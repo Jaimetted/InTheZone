@@ -80,7 +80,7 @@ void armX(float speed)
 {
 	const float k = 0.50;
 	const int encDif = 2;
-	int Q = (SensorValue(encL)-SensorValue(encR));
+	int Q = (SensorValue(encL)-SensorValue(encR)); // Andres Comment - Is sensor drift a problem?
 
 	if(Q <= encDif && Q >=-encDif)
 	{
@@ -103,7 +103,7 @@ void armX(float speed)
 }
 
 //Proceso de brazos
-task setArm{
+task setArm{ // Andres Comment - Sets arm based on only one side
 	while(SensorValue(encR) < armTarget){
 		armX(armSpeed);
 		armStat = (SensorValue(encR) / armTarget);	//set el porcentaje
@@ -148,7 +148,7 @@ task moveBase
 		const int encDif = 2;
 		int Q = (SensorValue(baseL)-SensorValue(baseR));
 
-		while(SensorValue(baseL) < baseTarget){
+		while(SensorValue(baseL) < baseTarget){ // Andres Comment - Target based only on left
 
 			if(Q <= encDif && Q >=-encDif)
 			{
@@ -389,7 +389,7 @@ task usercontrol()
   // Remove this function call once you have "real" code.
   //UserControlCodePlaceholderForTesting();
 
-	// 
+	//
 	float hold = 15/127;
 
 	// Movimiento de la base
@@ -404,7 +404,7 @@ task usercontrol()
 	//Double Reverse LEFT/RIGHT UP/DOWN
 	motor[DRLU] = vexRT(Ch2)*(SensorValue(limitDR) + hold); // why? *SensorValue(limitArms);
 	motor[DRRU] = vexRT(Ch2)*(SensorValue(limitDR) + hold); //      *SensorValue(limitArms);
-	
+
 	//false = in
 	//true = out
 	if(vexRT[Btn6U])
