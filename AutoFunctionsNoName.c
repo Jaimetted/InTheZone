@@ -26,12 +26,13 @@
 #include "BNSLib.h";
 
 #define STOP 0
-#define CHAINBAR_HORIZONTAL 1465
-#define CHAINBAR_VERTICAL 3700
+#define CHAINBAR_HORIZONTAL 285
+#define CHAINBAR_VERTICAL 1900
+#define CHAINBAR_DOWN 70
 #define MAX_CONE_DISTANCE 30
 #define MAX_ELEVATION 3170
 #define MAX_CONES 17
-#define DOWN 1225
+#define DOWN_DR 1225
 
 int trigger = 0;
 int coneCounter = 4;//Cones that can be managed with chainbar only
@@ -327,7 +328,7 @@ void rollerControl(){
 		setRollers(-127);
 	}
 	else{
-		setRollers(STOP);
+		setRollers(15);
 	}
 }
 
@@ -429,7 +430,7 @@ void triggerHappy(void){
 		wait1Msec(100);//Let the Cone Settle
 		setPositionCB(CHAINBAR_HORIZONTAL);
 		setChainbar(25);
-		setPositionDR(DOWN+100);
+		setPositionDR(DOWN_DR+100);
 		wait1Msec(100);
 		setChainbar(0);
 	}
@@ -490,10 +491,9 @@ task main()
 {
 
 	while(true){
-
-		writeDebugStreamLine("%d\n",SensorValue(potElevation));
+		writeDebugStreamLine("%d\n",SensorValue(potChainbar));
 		//wait10Msec(25);
-		genericControl();
+		//genericControl();
 		//trigger = 1;
 		//sonarElevation();
 	}
