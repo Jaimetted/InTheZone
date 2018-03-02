@@ -122,6 +122,7 @@ float inchesToTicks(int inches)
 	return ticks;
 }
 
+
 // Move the base to the front. Request the distance for know how much need to move,
 // the variable time is the maximun time for wait to the movement to
 // prevent keep going infinitely the task if the robot can´t move and
@@ -461,6 +462,29 @@ void init()
 
 	clearDebugStream();
 }
+
+void moveBaseUntil(int distance,int time){
+	int count = 0;
+	bool atPos = 0;
+	float pidMovResult;
+	PID pidMovement;
+	PIDInit(&pidMovement, 0.15, .1, 0.25); // Set P, I, and D consttime
+	clearTimer(T1);
+	int timer = T1;
+	setPositionCB(CHAINBAR_VERTICAL);
+	while(!atPos && timer < time){
+		pidMovResult = PIDCompute(&pidMovement, distance - SensorValue(baseSonar));
+		moveBase(pidMovResult);
+		if (abs(SensorValue(baseSonar) - distance) < 5)
+			count++;
+		if (count >= 5)
+			atPos = true;
+		timer = time1[T1];
+	}
+	moveBase(0);
+	writeDebugStreamLine("Sonar = %d", SensorValue(baseSonar));
+}
+
 
 task main()
 {
