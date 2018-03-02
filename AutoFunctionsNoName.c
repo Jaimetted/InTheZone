@@ -147,7 +147,7 @@ void moveBaseWithFactor(int distance, int time, float factor){
 
 	PID pidMovement;
 	//PID pidStraight;
-	PIDInit(&pidMovement, 0.5, .1, 0.25); // Set P, I, and D constants
+	PIDInit(&pidMovement, 0.3, 0, 1.5); // Set P, I, and D constants
 	//PIDInit(&pidStraight, 2, 0, 0.3);//Set constants for driving straight
 
 	clearTimer(T1);
@@ -255,16 +255,17 @@ void rotateToAngle(float targetAngle, int time){
 	counter = 0;
 
 	PID pidGyro;
-	PIDInit(&pidGyro, 0.1, 0, 0.3); // Set P, I, and D constants
+	PIDInit(&pidGyro, 0.3, 0, 1.5); // Set P, I, and D constants
 
 	clearTimer(T1);
 	int timer = time1[T1];
 	while(!atGyro && timer < time){
+		writeDebugStreamLine("Current angle = %f", gyroAngle);
 		pidGyroResult = PIDCompute(&pidGyro, targetAngle - gyroAngle);
 		rotateBase(18*pidGyroResult);
 		if (abs(gyroAngle-targetAngle)<0.1)
 			counter++;
-		if (counter > 3)
+		if (counter > 10)
 			atGyro = true;
 		timer = time1[T1];
 		wait1Msec(20);
@@ -381,6 +382,23 @@ void setPositionCB(int angle){
 	baseControl();
 }
 
+void setPositionCBHappy(int angle){
+	while(SensorValue[potChainbar] != angle){
+		if(SensorValue(potChainbar)<angle){
+			setChainbar(127);
+			baseControl();
+		}
+		else if(SensorValue(potChainbar)>angle){
+			setChainbar(-127);
+			baseControl();
+
+		}
+	}
+	setChainbar(STOP);
+	setChainbar(7);
+	baseControl();
+}
+
 void chainbarControl(){
 	if(vexRT(Btn8U)){
 		baseControl();
@@ -390,8 +408,8 @@ void chainbarControl(){
 	}
 	else if(vexRT(Btn8D)){
 		baseControl();
-		setPositionCB(CHAINBAR_HORIZONTAL);
-		setChainbar(15);
+		setPositionCB(CHAINBAR_DOWN);
+		setChainbar(0);
 		setElevation(10);
 	}
 }
@@ -413,7 +431,7 @@ bool sonarElevation(void){
 		//coneCounter++;
 		setElevation(127);
 		if(SensorValue(potElevation) > MAX_ELEVATION - 50){//Worst Case
-			setElevation(STOP);
+			elevationHold();
 			return true;
 		}
 	}
@@ -422,15 +440,17 @@ bool sonarElevation(void){
 }
 void triggerHappy(void){
 	if(vexRt(Btn5U)){
-		setPositionCB(CHAINBAR_HORIZONTAL);
+
+		//setPositionCB(CHAINBAR_HORIZONTAL);
 		sonarElevation();
-		setPositionCB(CHAINBAR_VERTICAL);
+		setPositionCBHappy(CHAINBAR_VERTICAL);
+		setChainbar(25);
 		wait1Msec(400);
 		setRollers(-127, 250);
 		wait1Msec(100);//Let the Cone Settle
-		setPositionCB(CHAINBAR_HORIZONTAL);
+		setPositionCBHappy(CHAINBAR_HORIZONTAL);
 		setChainbar(25);
-		setPositionDR(DOWN_DR+100);
+		setPositionDR(DOWN_DR+75);
 		wait1Msec(100);
 		setChainbar(0);
 	}
@@ -469,19 +489,18 @@ void moveBaseUntil(int distance,int time){
 	bool atPos = 0;
 	float pidMovResult;
 	PID pidMovement;
-	PIDInit(&pidMovement, 0.15, .1, 0.25); // Set P, I, and D consttime
+	PIDInit(&pidMovement, 1, 0, 1.5); // Set P, I, and D consttime
 	clearTimer(T1);
 	int timer = T1;
 	setPositionCB(CHAINBAR_VERTICAL);
-	while(!atPos && timer < time){
-		pidMovResult = PIDCompute(&pidMovement, distance - SensorValue(baseSonar));
-		moveBase(pidMovResult);
-		if (abs(SensorValue(baseSonar) - distance) < 5)
-			count++;
-		if (count >= 5)
-			atPos = true;
+	setChainbar(15);
+	while(SensorValue(baseSonar) > distance  && timer < time){
+		writeDebugStreamLine("%d\n",SensorValue(baseSonar));
+		moveBase(127);
 		timer = time1[T1];
 	}
+	moveBase(-10);
+	wait1Msec(100);
 	moveBase(0);
 	writeDebugStreamLine("Sonar = %d", SensorValue(baseSonar));
 }
@@ -490,12 +509,17 @@ void moveBaseUntil(int distance,int time){
 task main()
 {
 
+	init();
+	//moveBaseWithFactor(24, 3000, 1);
+	//rotateToAngle(180, 3000);
+	moveBaseUntil(45,3000);
 	while(true){
-		writeDebugStreamLine("%d\n",SensorValue(potChainbar));
-		//wait10Msec(25);
-		//genericControl();
-		//trigger = 1;
-		//sonarElevation();
+	//writeDebugStreamLine("Sonar = %d", SensorValue(baseSonar));
+
+	//	//wait10Msec(25);
+	//	genericControl();
+	//	//trigger = 1;
+	//	//sonarElevation();
 	}
 }
 
