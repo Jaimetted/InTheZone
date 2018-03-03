@@ -33,6 +33,8 @@
 #define MAX_ELEVATION 3170
 #define MAX_CONES 17
 #define DOWN_DR 1225
+#define DROP_MOGO 2890
+#define GET_MOGO 900
 
 int trigger = 0;
 int coneCounter = 4;//Cones that can be managed with chainbar only
@@ -196,7 +198,7 @@ void moveBaseBack(int distance, int time, int slowFactor)
 
 	PID pidMovement;
 	//PID pidStraight;
-	PIDInit(&pidMovement, 0.2, 0, 0.018); // Set P, I, and D constants
+	PIDInit(&pidMovement, 0.3, 0, 1.5); // Set P, I, and D constants
 	//PIDInit(&pidStraight, 0.5, 0, 0);//Set constants for driving straight
 
 	clearTimer(T1);
@@ -335,7 +337,7 @@ void rollerControl(){
 
 void moGoControl(void){
 	if(vexRT(Btn8R)){
-		setMOGOGripper(80);
+		setMOGOGripper(127);
 	}
 	else if(vexRT(Btn8L)){
 		setMOGOGripper(-127);
@@ -425,6 +427,25 @@ void setPositionDR(int angle){
 	}
 	elevationHold();
 }
+
+void setPositionMogo(int angle){
+	if(SensorValue[potGripper] < angle)
+	{
+		while(SensorValue[potGripper] < angle)
+		{
+			setMOGOGripper(127);
+		}
+	}
+	else
+	{
+		while(SensorValue(potGripper)>angle)
+		{
+			setMOGOGripper(-127);
+		}
+	}
+	setMOGOGripper(0);
+}
+
 bool sonarElevation(void){
 	while(SensorValue(coneSonar) < MAX_CONE_DISTANCE){
 		// && coneCounter < MAX_CONES-1
@@ -439,8 +460,6 @@ bool sonarElevation(void){
 	return false;
 }
 void triggerHappy(void){
-	if(vexRt(Btn5U)){
-
 		//setPositionCB(CHAINBAR_HORIZONTAL);
 		sonarElevation();
 		setPositionCBHappy(CHAINBAR_VERTICAL);
@@ -453,7 +472,6 @@ void triggerHappy(void){
 		setPositionDR(DOWN_DR+75);
 		wait1Msec(100);
 		setChainbar(0);
-	}
 }
 
 void genericControl(void){
@@ -462,7 +480,7 @@ void genericControl(void){
 	rollerControl();
 	chainbarControl();
 	moGoControl();
-	triggerHappy();
+	if(vexRT(Btn5U)) triggerHappy();
 }
 
 void init()
@@ -485,14 +503,12 @@ void init()
 }
 
 void moveBaseUntil(int distance,int time){
-	int count = 0;
-	bool atPos = 0;
 	float pidMovResult;
 	PID pidMovement;
 	PIDInit(&pidMovement, 1, 0, 1.5); // Set P, I, and D consttime
 	clearTimer(T1);
 	int timer = T1;
-	setPositionCB(CHAINBAR_VERTICAL);
+	//setPositionCB(CHAINBAR_VERTICAL);
 	setChainbar(15);
 	while(SensorValue(baseSonar) > distance  && timer < time){
 		writeDebugStreamLine("%d\n",SensorValue(baseSonar));
@@ -505,19 +521,65 @@ void moveBaseUntil(int distance,int time){
 	writeDebugStreamLine("Sonar = %d", SensorValue(baseSonar));
 }
 
+void auto1()
+{
+	setOffsetAngle(270);
+	setRollers(30);
+	setPositionCB(CHAINBAR_HORIZONTAL);
+	//moveBaseWithFactor(18,2000,1);
+	setPositionDR(MAX_ELEVATION-900);
+	//moveBaseWithFactor(6,1000,1);
+  moveBaseUntil(59,3000);
+  wait1Msec(200);
+	setRollers(-127,1000);
+	moveBaseBack(8,1000,1);
+	setPositionDR(DOWN_DR+350);
+	rotateToAngle(364,2000);
+	//rotateToAngle(5,2000);
+	moveBaseWithFactor(23,2000,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+	wait1Msec(750);
+	setRollers(10);
+	setPositionCB(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	rotateToAngle(382,2000);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(11,2000,1);
+	wait1Msec(50);
+	setPositionMogo(GET_MOGO);
+	setRollers(-127,400);
+	moveBaseBack(11,1000,1);
+	wait1Msec(100);
+	rotateToAngle(362,2000);
+	wait1Msec(100);
+	moveBaseWithFactor(6,1000,1);
+	setRollers(127);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	wait1Msec(300);
+	setRollers(10);
+	triggerHappy();
+
+
+}
 
 task main()
 {
 
-	init();
+	//init();
 	//moveBaseWithFactor(24, 3000, 1);
 	//rotateToAngle(180, 3000);
-	moveBaseUntil(45,3000);
+	//moveBaseUntil(45,3000);
+	//init();
+	//auto1();
+	//autopotChaipotChainbar
 	while(true){
-	//writeDebugStreamLine("Sonar = %d", SensorValue(baseSonar));
+	//writeDebugStreamLine("Pot CB = %d", SensorValue(potChainbar));
 
 	//	//wait10Msec(25);
-	//	genericControl();
+	//init();
+	//auto1();
+	genericControl();
 	//	//trigger = 1;
 	//	//sonarElevation();
 	}
