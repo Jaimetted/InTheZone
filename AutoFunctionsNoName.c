@@ -27,14 +27,15 @@
 
 #define STOP 0
 #define CHAINBAR_HORIZONTAL 285
-#define CHAINBAR_VERTICAL 1900
-#define CHAINBAR_DOWN 70
+#define CHAINBAR_VERTICAL 1850
+#define CHAINBAR_DOWN 60
 #define MAX_CONE_DISTANCE 30
-#define MAX_ELEVATION 3170
+#define MAX_ELEVATION 2900
 #define MAX_CONES 17
-#define DOWN_DR 1225
-#define DROP_MOGO 2890
-#define GET_MOGO 900
+#define DOWN_DR 1120
+#define DROP_MOGO 3000
+#define GET_MOGO 940
+#define VERTICAL_MOGO 1950
 
 int trigger = 0;
 int coneCounter = 4;//Cones that can be managed with chainbar only
@@ -257,7 +258,7 @@ void rotateToAngle(float targetAngle, int time){
 	counter = 0;
 
 	PID pidGyro;
-	PIDInit(&pidGyro, 0.3, 0, 1.5); // Set P, I, and D constants
+	PIDInit(&pidGyro, 0.25, 0, 1.8); // Set P, I, and D constants
 
 	clearTimer(T1);
 	int timer = time1[T1];
@@ -367,37 +368,48 @@ void elevationControl(void){
 }
 
 void setPositionCB(int angle){
-	while(SensorValue[potChainbar] != angle){
-		if(SensorValue(potChainbar)<angle){
+	if(SensorValue[potChainbar] < angle)
+	{
+		while(SensorValue[potChainbar] < angle)
+		{
 			setChainbar(127);
 			baseControl();
 			elevationControl();
 		}
-		else if(SensorValue(potChainbar)>angle){
+	}
+	else
+	{
+		while(SensorValue(potChainbar)>angle)
+		{
 			setChainbar(-127);
 			baseControl();
 			elevationControl();
 		}
 	}
-	setChainbar(STOP);
-	setChainbar(7);
+	setChainbar(15);
 	baseControl();
+	elevationControl();
 }
 
 void setPositionCBHappy(int angle){
-	while(SensorValue[potChainbar] != angle){
-		if(SensorValue(potChainbar)<angle){
+	if(SensorValue[potChainbar] < angle)
+	{
+		while(SensorValue[potChainbar] < angle)
+		{
 			setChainbar(127);
 			baseControl();
 		}
-		else if(SensorValue(potChainbar)>angle){
+	}
+	else
+	{
+		while(SensorValue(potChainbar)>angle)
+		{
 			setChainbar(-127);
 			baseControl();
-
 		}
 	}
-	setChainbar(STOP);
-	setChainbar(7);
+	if(angle == CHAINBAR_DOWN) setChainbar(-15);
+	else setChainbar(15);
 	baseControl();
 }
 
@@ -417,11 +429,18 @@ void chainbarControl(){
 }
 
 void setPositionDR(int angle){
-	while(SensorValue[potElevation]!= angle){
-		if(SensorValue(potElevation)<angle){
+	clearTimer(T2);
+	if(SensorValue[potElevation] < angle)
+	{
+		while(SensorValue[potElevation] < angle && time1(T2) < 3000)
+		{
 			setElevation(127);
 		}
-		else if(SensorValue(potElevation)>angle){
+	}
+	else
+	{
+		while(SensorValue(potElevation)>angle && time1(T2) < 3000)
+		{
 			setElevation(-127);
 		}
 	}
@@ -429,16 +448,17 @@ void setPositionDR(int angle){
 }
 
 void setPositionMogo(int angle){
+	clearTimer(T2);
 	if(SensorValue[potGripper] < angle)
 	{
-		while(SensorValue[potGripper] < angle)
+		while(SensorValue[potGripper] < angle && time1(T2) < 1000)
 		{
 			setMOGOGripper(127);
 		}
 	}
 	else
 	{
-		while(SensorValue(potGripper)>angle)
+		while(SensorValue(potGripper)>angle && time1(T2) < 1000)
 		{
 			setMOGOGripper(-127);
 		}
@@ -460,7 +480,7 @@ bool sonarElevation(void){
 	return false;
 }
 void triggerHappy(void){
-		//setPositionCB(CHAINBAR_HORIZONTAL);
+		setPositionCB(CHAINBAR_DOWN);
 		sonarElevation();
 		setPositionCBHappy(CHAINBAR_VERTICAL);
 		setChainbar(25);
@@ -473,6 +493,19 @@ void triggerHappy(void){
 		wait1Msec(100);
 		setChainbar(0);
 }
+
+void triggerHappyAuto(void){
+		sonarElevation();
+		setPositionCBHappy(CHAINBAR_VERTICAL);
+		setChainbar(25);
+		wait1Msec(400);
+		setRollers(-127, 250);
+		wait1Msec(100);//Let the Cone Settle
+		setPositionCBHappy(CHAINBAR_DOWN);
+		setPositionDR(DOWN_DR+350);
+}
+
+
 
 void genericControl(void){
 	baseControl();
@@ -503,89 +536,419 @@ void init()
 }
 
 void moveBaseUntil(int distance,int time){
-	float pidMovResult;
-	PID pidMovement;
-	PIDInit(&pidMovement, 1, 0, 1.5); // Set P, I, and D consttime
 	clearTimer(T1);
 	int timer = T1;
-	//setPositionCB(CHAINBAR_VERTICAL);
 	setChainbar(15);
-	while(SensorValue(baseSonar) > distance  && timer < time){
-		writeDebugStreamLine("%d\n",SensorValue(baseSonar));
-		moveBase(127);
-		timer = time1[T1];
+	if(SensorValue(baseSonar) > distance)
+	{
+		while(SensorValue(baseSonar) > distance  && timer < time){
+			writeDebugStreamLine("%d\n",SensorValue(baseSonar));
+			moveBase(127);
+			timer = time1[T1];
+		}
+		moveBase(-10);
 	}
-	moveBase(-10);
+	else
+	{
+		while(SensorValue(baseSonar) < distance  && timer < time){
+			writeDebugStreamLine("%d\n",SensorValue(baseSonar));
+			moveBase(-127);
+			timer = time1[T1];
+		}
+		moveBase(10);
+	}
 	wait1Msec(100);
 	moveBase(0);
 	writeDebugStreamLine("Sonar = %d", SensorValue(baseSonar));
 }
 
+// Starts Red side to short cones sides
 void auto1()
 {
-	setOffsetAngle(270);
-	setRollers(30);
-	setPositionCB(CHAINBAR_HORIZONTAL);
-	//moveBaseWithFactor(18,2000,1);
+	setOffsetAngle(315);
+	// Deploy
+	setRollers(50);
+	wait1Msec(200);
 	setPositionDR(MAX_ELEVATION-900);
-	//moveBaseWithFactor(6,1000,1);
-  moveBaseUntil(59,3000);
+	setChainbar(-127);
+	wait1Msec(700);
+	setChainbar(0);
+	//setPositionCBHappy(CHAINBAR_HORIZONTAL);
+	// Crayola cone
+  moveBaseUntil(45,3000);//era 57
   wait1Msec(200);
 	setRollers(-127,1000);
-	moveBaseBack(8,1000,1);
-	setPositionDR(DOWN_DR+350);
-	rotateToAngle(364,2000);
-	//rotateToAngle(5,2000);
-	moveBaseWithFactor(23,2000,1);
+	// First cone
+	moveBaseBack(3,1000,1);
+	//moveBaseUntil(44,1000);
+	setPositionCB(CHAINBAR_VERTICAL);
+	setPositionDR(DOWN_DR+400);
+	rotateToAngle(375,2000);
+	moveBaseWithFactor(31,2000,1);
+	setPositionCB(CHAINBAR_DOWN);
 	setRollers(127);
 	setPositionDR(DOWN_DR);
-	wait1Msec(750);
+	wait1Msec(600);
 	setRollers(10);
-	setPositionCB(CHAINBAR_VERTICAL);
+	//Mogo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
 	setChainbar(12);
-	rotateToAngle(382,2000);
+	rotateToAngle(384,700);
 	setPositionMogo(DROP_MOGO);
-	moveBaseWithFactor(11,2000,1);
+	moveBaseWithFactor(13,2000,1);
 	wait1Msec(50);
 	setPositionMogo(GET_MOGO);
+	// Drop first cone
 	setRollers(-127,400);
+	wait1Msec(100);
+	// Second cone
+	rotateToAngle(398,700);
 	moveBaseBack(11,1000,1);
 	wait1Msec(100);
 	rotateToAngle(362,2000);
 	wait1Msec(100);
-	moveBaseWithFactor(6,1000,1);
+	moveBaseWithFactor(5,1000,1);
 	setRollers(127);
 	setPositionCBHappy(CHAINBAR_DOWN);
-	wait1Msec(300);
+	wait1Msec(500);
 	setRollers(10);
-	triggerHappy();
+	triggerHappyAuto();
+	// Third cone
+	moveBaseWithFactor(6,1000,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(400);
+  setRollers(10);
+	triggerHappyAuto();
+	// Fourth cone
+	rotateToAngle(362,2000);
+	moveBaseWithFactor(9,1000,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(400);
+  setRollers(10);
+	triggerHappyAuto();
+	// Fifth cone
+	moveBaseWithFactor(6,1000,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(400);
+  setRollers(10);
+  moveBaseBack(5,500,1);
+	// triggerHappyAuto(); With arm up
+  sonarElevation();
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(25);
+	wait1Msec(400);
+	setRollers(-127, 250);
+	wait1Msec(100);//Let the Cone Settle
+  // End trigger happy with arm up
+	moveBaseBack(57,4000,1);
+	rotateToAngle(222,2000);
+	moveBaseWithFactor(5,500,1);
+	rotateToAngle(138,2000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-30);
+	setBase(127);
+	wait1Msec(1500);
+	setBase(0);
+	wait1Msec(100);
+	setPositionMogo(VERTICAL_MOGO+700);
+	setMOGOGripper(-30);
+	setBase(-127);
+	wait1Msec(600);
+	setBase(0);
+}
 
+// Starts Red side to short cones sides
+void auto2()
+{
+	setOffsetAngle(315);
+	// Deploy
+	setRollers(50);
+	wait1Msec(200);
+	setPositionDR(MAX_ELEVATION-1000);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	// Crayola cone
+  moveBaseUntil(47,3000);//era 57
+  wait1Msec(200);
+	setRollers(-127,1000);
+	// First cone
+	moveBaseBack(3,1000,1);
+	//moveBaseUntil(44,1000);
+	setPositionCB(CHAINBAR_VERTICAL);
+	setPositionDR(DOWN_DR+350);
+	rotateToAngle(375,1500);
+	moveBaseWithFactor(31,2000,0.75);
+	setRollers(127);
+	setPositionCB(CHAINBAR_DOWN);
+	setPositionDR(DOWN_DR);
+	wait1Msec(500);
+	setRollers(10);
+	//Mogo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	rotateToAngle(384,700);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(13,1000,1);
+	wait1Msec(50);
+	setPositionMogo(GET_MOGO);
+	// Drop first cone
+	setRollers(-127,400);
+	wait1Msec(100);
+	// Second cone
+	rotateToAngle(398,700);
+	moveBaseBack(11,1000,1);
+	wait1Msec(100);
+	rotateToAngle(362,700);
+	wait1Msec(100);
+	moveBaseWithFactor(5,500,1);
+	setRollers(127);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	setPositionDR(DOWN_DR);
+	wait1Msec(500);
+	setRollers(10);
+	triggerHappyAuto();
+	// Third cone
+	moveBaseWithFactor(8,500,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(500);
+  setRollers(10);
+	triggerHappyAuto();
+	// Fourth cone
+	rotateToAngle(362,500);
+	moveBaseWithFactor(9,500,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(500);
+  setRollers(10);
+	// triggerHappyAuto(); With arm up
+  sonarElevation();
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(25);
+	wait1Msec(300);
+	setRollers(-127, 250);
+	wait1Msec(100);//Let the Cone Settle
+  // End trigger happy with arm up
+	moveBaseBack(55,2500,1);
+	rotateToAngle(222,2000);
+	moveBaseWithFactor(5,500,1);
+	rotateToAngle(138,2000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-30);
+	setBase(127);
+	wait1Msec(1500);
+	setBase(0);
+	wait1Msec(100);
+	setPositionMogo(VERTICAL_MOGO+700);
+	setMOGOGripper(-30);
+	setBase(-127);
+	wait1Msec(600);
+	setBase(0);
+}
+
+void auto3()
+{
+	setOffsetAngle(315);
+	// Deploy
+	setRollers(50);
+	wait1Msec(200);
+	setPositionDR(MAX_ELEVATION-900);
+	setChainbar(-127);
+	wait1Msec(700);
+	setChainbar(0);
+	//setPositionCBHappy(CHAINBAR_HORIZONTAL);
+	// Crayola cone
+  moveBaseUntil(45,3000);//era 57
+  wait1Msec(200);
+	setRollers(-127,1000);
+	// First cone
+	moveBaseBack(3,1000,1);
+	//moveBaseUntil(44,1000);
+	setPositionCB(CHAINBAR_VERTICAL);
+	setPositionDR(DOWN_DR+350);
+	rotateToAngle(376,1500);
+	moveBaseWithFactor(31,2000,0.75);
+	setPositionCB(CHAINBAR_DOWN);
+	setRollers(127);
+	wait1Msec(500);
+	setRollers(10);
+	//Mogo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	rotateToAngle(384,700);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(13,1000,1);
+	wait1Msec(50);
+	setPositionMogo(GET_MOGO);
+	// Drop first cone
+	setRollers(-127,400);
+	wait1Msec(100);
+	// Second cone
+	rotateToAngle(398,700);
+	moveBaseBack(11,1000,1);
+	wait1Msec(100);
+	rotateToAngle(362,700);
+	wait1Msec(100);
+	moveBaseWithFactor(5,500,1);
+	setRollers(127);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	wait1Msec(500);
+	setRollers(10);
+	triggerHappyAuto();
+	// Third cone
+	moveBaseWithFactor(8,500,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(500);
+  setRollers(10);
+	// triggerHappyAuto(); With arm up, no drop
+  sonarElevation();
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(25);
+	wait1Msec(100);//Let the Cone Settle
+  // End trigger happy with arm up
+	//
+	moveBaseBack(45,2500,1);
+	rotateToAngle(222,1500);
+	moveBaseWithFactor(7,500,1);
+	rotateToAngle(133,1000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-15);
+	setBase(127);
+	wait1Msec(750);
+	//setMOGOGripper(127);
+	wait1Msec(750);
+	setBase(0);
+	wait1Msec(100);
+	setMOGOGripper(-127);
+	setBase(-127);
+	wait1Msec(1000);
+	setBase(0);
+	setPositionMogo(GET_MOGO);
+	//Position
+	moveBaseWithFactor(10,2000,0.25);
+	moveBaseBack(6,500,1);
+	rotateToAngle(222,1000);
+	moveBaseWithFactor(20,1000,1);
+	rotateToAngle(270,1000);
+	//Get 2nd MoGo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(20,2000,1);
+	wait1Msec(50);
+	setPositionMogo(GET_MOGO);
+	//Drop cone
+	setRollers(-127,500);
+	//Drop MOGO
+	moveBaseBack(50,2500,1);
+	rotateToAngle(222,1500);
+	moveBaseBack(7,500,1);
+	rotateToAngle(133,1000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-30);
+	setBase(127);
+	wait1Msec(750);
+	setMOGOGripper(127);
+	wait1Msec(750);
+	setBase(0);
+	wait1Msec(100);
+	setMOGOGripper(GET_MOGO);
+	setBase(-127);
+	wait1Msec(1000);
+	setBase(0);
+}
+
+// Rojo mirando al lado largo de conos/ Defensa
+void auto4()
+{
+	setOffsetAngle(270);
+	setRollers(30);
+	//Get 2nd MoGo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(35,2000,1);
+	wait1Msec(50);
+	setPositionMogo(GET_MOGO);
+	rotateToAngle(270,300);
+	//Drop cone
+	setRollers(-127,500);
+
+	// Second cone
+	moveBaseWithFactor(5,500,1);
+	setRollers(127);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	wait1Msec(500);
+	setRollers(10);
+	triggerHappyAuto();
+	// Third cone
+	moveBaseWithFactor(8,500,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(500);
+  setRollers(10);
+	triggerHappyAuto();
+	// Fourth cone
+	moveBaseWithFactor(8,500,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(500);
+  setRollers(10);
+  moveBaseBack(5,400,1);
+  rotateToAngle(270,500);
+	// triggerHappyAuto(); With arm up, no drop
+  sonarElevation();
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(25);
+	wait1Msec(100);//Let the Cone Settle
+  // End trigger happy with arm up
+
+	//Drop MOGO
+	moveBaseBack(45,2500,1);
+	rotateToAngle(222,1500);
+	moveBaseBack(25,500,1);
+	rotateToAngle(133,1000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-30);
+	setBase(127);
+	wait1Msec(750);
+	wait1Msec(750);
+	setBase(0);
+	wait1Msec(100);
+	setPositionMogo(VERTICAL_MOGO+700);
+	setMOGOGripper(-30);
+	setBase(-127);
+	wait1Msec(600);
+	setBase(0);
+
+	//Crayola
+	setPositionMogo(GET_MOGO);
+	rotateToAngle(313,1000);
+	setPositionDR(MAX_ELEVATION-900);
+	setChainbar(-127);
+	wait1Msec(700);
+	setChainbar(0);
+	//setPositionCBHappy(CHAINBAR_HORIZONTAL);
+	// Crayola cone
+  moveBaseUntil(45,3000);//era 57
+  wait1Msec(200);
+	setRollers(-127,1000);
 
 }
 
 task main()
 {
-
 	//init();
-	//moveBaseWithFactor(24, 3000, 1);
-	//rotateToAngle(180, 3000);
-	//moveBaseUntil(45,3000);
-	//init();
+	//auto2();
+	//setPositionMogo(VERTICAL_MOGO);
+	//setMOGOGripper(-30);
+	//wait1Msec(5000);
 	//auto1();
-	//autopotChaipotChainbar
 	while(true){
-	//writeDebugStreamLine("Pot CB = %d", SensorValue(potChainbar));
-
-	//	//wait10Msec(25);
-	//init();
-	//auto1();
+	//writeDebugStreamLine("Pot = %d", SensorValue(potElevation));
 	genericControl();
-	//	//trigger = 1;
-	//	//sonarElevation();
 	}
 }
-
-// Cuanto sube para llegar al poste
-// Cuan cerca del poste debe estar (sonar value)
-
-//subir acercar y soltar, regresar
