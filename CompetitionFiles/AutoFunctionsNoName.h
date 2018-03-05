@@ -9,7 +9,7 @@
 
 #define STOP 0
 #define CHAINBAR_HORIZONTAL 285
-#define CHAINBAR_VERTICAL 1850
+#define CHAINBAR_VERTICAL 1710
 #define CHAINBAR_DOWN 60
 #define MAX_CONE_DISTANCE 30
 #define MAX_ELEVATION 2900
@@ -541,9 +541,7 @@ void auto1()
 	setRollers(50);
 	wait1Msec(200);
 	setPositionDR(MAX_ELEVATION-900);
-	setChainbar(-127);
-	wait1Msec(700);
-	setChainbar(0);
+	setPositionCB(CHAINBAR_DOWN);
 	//setPositionCBHappy(CHAINBAR_HORIZONTAL);
 	// Crayola cone
   moveBaseUntil(45,3000);//era 57
@@ -566,7 +564,7 @@ void auto1()
 	setChainbar(12);
 	rotateToAngle(384,700);
 	setPositionMogo(DROP_MOGO);
-	moveBaseWithFactor(13,2000,1);
+	moveBaseWithFactor(16,2000,1);
 	wait1Msec(50);
 	setPositionMogo(GET_MOGO);
 	// Drop first cone
@@ -578,7 +576,8 @@ void auto1()
 	wait1Msec(100);
 	rotateToAngle(362,2000);
 	wait1Msec(100);
-	moveBaseWithFactor(5,1000,1);
+
+	/*moveBaseWithFactor(5,1000,1);
 	setRollers(127);
 	setPositionCBHappy(CHAINBAR_DOWN);
 	wait1Msec(500);
@@ -614,7 +613,105 @@ void auto1()
 	setRollers(-127, 250);
 	wait1Msec(100);//Let the Cone Settle
   // End trigger happy with arm up
-	moveBaseBack(57,4000,1);
+	*/
+	moveBaseBack(36,4000,1); // was 57
+	rotateToAngle(222,2000);
+	moveBaseWithFactor(5,500,1);
+	rotateToAngle(138,2000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-30);
+	setBase(127);
+	wait1Msec(1500);
+	setBase(0);
+	wait1Msec(100);
+	setPositionMogo(VERTICAL_MOGO+700);
+	setMOGOGripper(-30);
+	setBase(-127);
+	wait1Msec(600);
+	setBase(0);
+}
+
+// Starts Red side to short cones sides
+void auto1_baseOnly()
+{
+	setOffsetAngle(315);
+	// Deploy
+	setRollers(50);
+	wait1Msec(200);
+	setPositionDR(MAX_ELEVATION-900);
+	setPositionCB(CHAINBAR_DOWN);
+	//setPositionCBHappy(CHAINBAR_HORIZONTAL);
+	// Crayola cone
+  moveBaseUntil(45,3000);//era 57
+  wait1Msec(200);
+	setRollers(-127,1000);
+	// First cone
+	moveBaseBack(3,1000,1);
+	//moveBaseUntil(44,1000);
+	setPositionCB(CHAINBAR_VERTICAL);
+	setPositionDR(DOWN_DR+400);
+	rotateToAngle(375,2000);
+	moveBaseWithFactor(31,2000,1);
+	setPositionCB(CHAINBAR_DOWN);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+	wait1Msec(600);
+	setRollers(10);
+	//Mogo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	rotateToAngle(384,700);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(14,2000,1);
+	wait1Msec(50);
+	setPositionMogo(GET_MOGO);
+	// Drop first cone
+	setRollers(-127,400);
+	wait1Msec(100);
+	// Second cone
+	rotateToAngle(398,700);
+	moveBaseBack(11,1000,1);
+	wait1Msec(100);
+	rotateToAngle(362,2000);
+	wait1Msec(100);
+	/*moveBaseWithFactor(5,1000,1);
+	setRollers(127);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	wait1Msec(500);
+	setRollers(10);
+	triggerHappyAuto();
+	// Third cone
+	moveBaseWithFactor(6,1000,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(400);
+  setRollers(10);
+	triggerHappyAuto();
+	// Fourth cone
+	rotateToAngle(362,2000);
+	moveBaseWithFactor(9,1000,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(400);
+  setRollers(10);
+	triggerHappyAuto();
+	// Fifth cone
+	moveBaseWithFactor(6,1000,1);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(400);
+  setRollers(10);
+  moveBaseBack(5,500,1);
+	// triggerHappyAuto(); With arm up
+  sonarElevation();
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(25);
+	wait1Msec(400);
+	setRollers(-127, 250);
+	wait1Msec(100);//Let the Cone Settle
+  // End trigger happy with arm up
+	*/
+	moveBaseBack(36,4000,1); // was 57
 	rotateToAngle(222,2000);
 	moveBaseWithFactor(5,500,1);
 	rotateToAngle(138,2000);
@@ -661,7 +758,7 @@ void auto2()
 	setChainbar(12);
 	rotateToAngle(384,700);
 	setPositionMogo(DROP_MOGO);
-	moveBaseWithFactor(13,1000,1);
+	moveBaseWithFactor(14,1000,1);
 	wait1Msec(50);
 	setPositionMogo(GET_MOGO);
 	// Drop first cone
@@ -719,6 +816,194 @@ void auto2()
 	setBase(0);
 }
 
+// Starts Blue side to short cones sides
+void auto2b()
+{
+	setOffsetAngle(315);
+	// Deploy
+	setRollers(50);
+	wait1Msec(200);
+	setPositionDR(MAX_ELEVATION-950);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	// Crayola cone
+  moveBaseUntil(47,3000);//era 57
+  wait1Msec(200);
+	setRollers(-127,1000);
+	// First cone
+	moveBaseBack(3,1000,1);
+	//moveBaseUntil(44,1000);
+	setPositionCB(CHAINBAR_VERTICAL);
+	setPositionDR(DOWN_DR+350);
+	//
+	rotateToAngle(257,1500);
+	moveBaseWithFactor(33,2000,0.75);
+	setRollers(127);
+	setPositionCB(CHAINBAR_DOWN);
+	setPositionDR(DOWN_DR);
+	wait1Msec(500);
+	setRollers(10);
+	//Mogo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	//to get the first cone
+	rotateToAngle(245,700);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(15,1000,1);
+	wait1Msec(50);
+	setPositionMogo(GET_MOGO);
+	// Drop first cone
+	setRollers(-127,400);
+	wait1Msec(100);
+	// Second cone
+	//
+	rotateToAngle(238,700);
+	moveBaseBack(11,1000,1);
+	wait1Msec(100);
+	rotateToAngle(272,700);
+	wait1Msec(100);
+	moveBaseWithFactor(5,500,1);
+	setRollers(127);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	setPositionDR(DOWN_DR);
+	wait1Msec(500);
+	setRollers(10);
+	triggerHappyAuto();
+	// Third cone
+	moveBaseWithFactor(5,500,1);// new
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(500);
+  setRollers(10);
+	triggerHappyAuto();
+	// Fourth cone
+	rotateToAngle(272,500);
+	moveBaseWithFactor(6,500,1);// new
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(500);
+  setRollers(10);
+	// triggerHappyAuto(); With arm up
+  sonarElevation();
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(25);
+	wait1Msec(300);
+	setRollers(-127, 250);
+	wait1Msec(100);//Let the Cone Settle
+  // End trigger happy with arm up
+	moveBaseBack(55,2500,1);
+	//
+	rotateToAngle(400,2000);
+	moveBaseWithFactor(5,500,1);
+	//
+	rotateToAngle(495,2000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-30);
+	setBase(127);
+	wait1Msec(1500);
+	setBase(0);
+	wait1Msec(100);
+	setPositionMogo(VERTICAL_MOGO+700);
+	setMOGOGripper(-30);
+	setBase(-127);
+	wait1Msec(600);
+	setBase(0);
+}
+
+void auto2b_baseOnly()
+{
+	setOffsetAngle(315);
+	// Deploy
+	setRollers(50);
+	wait1Msec(200);
+	setPositionDR(MAX_ELEVATION-950);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	// Crayola cone
+  moveBaseUntil(47,3000);//era 57
+  wait1Msec(200);
+	setRollers(-127,1000);
+	// First cone
+	moveBaseBack(3,1000,1);
+	//moveBaseUntil(44,1000);
+	setPositionCB(CHAINBAR_VERTICAL);
+	setPositionDR(DOWN_DR+350);
+	//
+	rotateToAngle(258,1500);
+	moveBaseWithFactor(32,2000,0.75);
+	setRollers(127);
+	setPositionCB(CHAINBAR_DOWN);
+	setPositionDR(DOWN_DR);
+	wait1Msec(500);
+	setRollers(10);
+	//Mogo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	//to get the first cone
+	rotateToAngle(246,700);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(16,1000,1);
+	wait1Msec(50);
+	setPositionMogo(GET_MOGO);
+	// Drop first cone
+	setRollers(-127,400);
+	wait1Msec(100);
+	// Second cone
+	//
+	rotateToAngle(238,700);
+	moveBaseBack(11,1000,1);
+	wait1Msec(100);
+	rotateToAngle(272,700);
+	wait1Msec(100);
+	/*moveBaseWithFactor(5,500,1);
+	setRollers(127);
+	setPositionCBHappy(CHAINBAR_DOWN);
+	setPositionDR(DOWN_DR);
+	wait1Msec(500);
+	setRollers(10);
+	triggerHappyAuto();
+	// Third cone
+	moveBaseWithFactor(5,500,1);// new
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(500);
+  setRollers(10);
+	triggerHappyAuto();
+	// Fourth cone
+	rotateToAngle(272,500);
+	moveBaseWithFactor(6,500,1);// new
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+  wait1Msec(500);
+  setRollers(10);
+	// triggerHappyAuto(); With arm up
+  sonarElevation();
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(25);
+	wait1Msec(300);
+	setRollers(-127, 250);
+	wait1Msec(100);//Let the Cone Settle
+  // End trigger happy with arm up
+	*/
+	moveBaseBack(37,2500,1);
+	//
+	rotateToAngle(400,2000);
+	moveBaseWithFactor(5,500,1);
+	//
+	rotateToAngle(495,2000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-30);
+	setBase(127);
+	wait1Msec(1500);
+	setBase(0);
+	wait1Msec(100);
+	setPositionMogo(VERTICAL_MOGO+700);
+	setMOGOGripper(-30);
+	setBase(-127);
+	wait1Msec(600);
+	setBase(0);
+}
+
+
+
 void auto3()
 {
 	setOffsetAngle(315);
@@ -750,7 +1035,7 @@ void auto3()
 	setChainbar(12);
 	rotateToAngle(384,700);
 	setPositionMogo(DROP_MOGO);
-	moveBaseWithFactor(13,1000,1);
+	moveBaseWithFactor(14,1000,1);
 	wait1Msec(50);
 	setPositionMogo(GET_MOGO);
 	// Drop first cone
@@ -1073,7 +1358,7 @@ void autonomous_selector(int auto_selection)
 		displayLCDCenteredString(0, "Auto 1");
 		displayLCDCenteredString(1, "is running!");
 		wait1Msec(100);
-		auto1();
+		auto2();
 	}
 	else if(auto_selection == 1)
 	{
@@ -1081,15 +1366,16 @@ void autonomous_selector(int auto_selection)
 		displayLCDCenteredString(0, "Auto 2");
 		displayLCDCenteredString(1, "is running!");
 		wait1Msec(100);
-		//auto1b();
+		auto2b();
 	}
 	else if(auto_selection == 2)
 	{
 		//If count = 2, run the code correspoinding with choice 3
 		displayLCDCenteredString(0, "Auto 2_M");
-		displayLCDCenteredString(1, "is running!");
+		displayLCDCenteredString(1, "is	 running!");
 		wait1Msec(100);
-		auto2();
+		auto1_baseOnly();
+		//antes era auto2()
 	}
 	else if(auto_selection == 3)
 	{
@@ -1097,7 +1383,7 @@ void autonomous_selector(int auto_selection)
 		displayLCDCenteredString(0, "Auto 3");
 		displayLCDCenteredString(1, "is running!");
 		wait1Msec(100);
-		//auto2b();
+		auto2b_baseOnly();
 	}
 	else if(auto_selection == 4)
 	{
