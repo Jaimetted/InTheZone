@@ -65,5 +65,10 @@ task autonomous()
 
 task usercontrol()
 {
+
+	stopTask(autonomous);
+	while(true){
+		writeDebugStreamLine("%d",SensorValue(potChainbar));
 	genericControl();
+}
 }
