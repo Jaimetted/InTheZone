@@ -1,4 +1,5 @@
 #pragma config(Sensor, in1,    gyroBase,       sensorGyro)
+#pragma config(Sensor, in2,    potGripper,     sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  encLeft,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  encRight,       sensorQuadEncoder)
 #pragma config(Motor,  port2,           left1,         tmotorVex393TurboSpeed_MC29, openLoop)
@@ -18,12 +19,9 @@
 #include "BNSLib.h";
 
 #define STOP 0
-#define CHAINBAR_HORIZONTAL 285
-#define CHAINBAR_VERTICAL 1850
-#define CHAINBAR_DOWN 60
-#define DROP_MOGO 3000
-#define GET_MOGO 940
-#define VERTICAL_MOGO 1950
+#define DROP_MOGO 2100
+#define GET_MOGO 460
+#define VERTICAL_MOGO 1200
 
 //*********************************************************************************************
 //			Setters
@@ -68,7 +66,7 @@ void moveBase(int speed)
 // Rotate the base clockwise or counter-clockwise.
 void rotateBase(int speed)
 {
-	setBase(-speed, speed);
+	setBase(speed, -speed);
 }
 
 // Stop moving the robot.
@@ -291,6 +289,25 @@ void genericControl(void){
 	}
 }
 
+void setPositionMogo(int angle){
+	clearTimer(T2);
+	if(SensorValue[potGripper] < angle)
+	{
+		while(SensorValue[potGripper] < angle && time1(T2) < 4000)
+		{
+			setMOGOGripper(127);
+		}
+	}
+	else
+	{
+		while(SensorValue(potGripper)>angle && time1(T2) < 4000)
+		{
+			setMOGOGripper(-127);
+		}
+	}
+	setMOGOGripper(0);
+}
+
 void init()
 {
 	BNS();
@@ -312,53 +329,57 @@ void init()
 
 void progSkills()
 {
-	setOffsetAngle(315);
-	setMOGOGripper(127);
-	wait1Msec(1000);
-	setMOGOGripper(0);
-	moveBaseWithFactor(30,2000,1);
-	setMOGOGripper(-127);
-	wait1Msec(1500);
-	setMOGOGripper(0);
-	moveBaseWithFactor(15,1000,1);
-	rotateToAngle(222, 1000);
-	moveBaseWithFactor(5,500,1);
-	rotateToAngle(138,2000);
-	moveBase(127);
-	wait1Msec(1500);
-	moveBase(0);
-	setMOGOGripper(127);
+	setOffsetAngle(90);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(20,2000,1);
+	setPositionMogo(GET_MOGO);
+	rotateToAngle(90,600);
+	moveBaseWithFactor(5,1000,1);
+	rotateToAngle(180, 1000);
 	wait1Msec(200);
-	setMOGOGripper(-30);
+	moveBaseWithFactor(5,1000,1);
+	wait1Msec(200);
+	rotateToAngle(90,2000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-15);
+	moveBaseWithFactor(15,700,1);
+	setPositionMogo(VERTICAL_MOGO+700);
+	setMOGOGripper(0);
+	rotateToAngle(90,3000);
 	moveBaseBack(20,2000,1);
-	rotateToAngle(222, 1000);
-	moveBaseWithFactor(10,500,1);
-	rotateToAngle(312,500);
+	setPositionMogo(GET_MOGO);
+	rotateToAngle(180, 1500);
+	wait1Msec(200);
+	moveBaseWithFactor(7,1000,1);//UUUUUUUUGGGGGGHHHH
+	wait1Msec(200);
+	rotateToAngle(274,1000);
 	//Repeat
-	setMOGOGripper(127);
-	wait1Msec(1000);
-	setMOGOGripper(0);
-	moveBaseWithFactor(30,2000,1);
-	setMOGOGripper(-127);
-	wait1Msec(1500);
-	setMOGOGripper(0);
-	moveBaseWithFactor(15,1000,1);
-	rotateToAngle(402, 1000);
-	moveBaseWithFactor(5,500,1);
-	rotateToAngle(108,2000);
-	moveBase(127);
-	wait1Msec(1500);
+	moveBase(-50);
+	wait1Msec(750);
 	moveBase(0);
-	setMOGOGripper(127);
-	wait1Msec(200);
-	setMOGOGripper(-30);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(20,2000,1);
+	setPositionMogo(GET_MOGO);
+	moveBaseWithFactor(10,1000,1);
+	rotateToAngle(360, 1000);
+	moveBaseWithFactor(6,1000,1);
+	rotateToAngle(270,2000);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-15);
+	moveBaseWithFactor(15,700,1);
+	setPositionMogo(VERTICAL_MOGO+700);
+	setMOGOGripper(0);
 	moveBaseBack(20,2000,1);
+	setPositionMogo(GET_MOGO);
 }
 
 task main()
 {
+	init();
+	progSkills();
 	while(true)
 	{
+		//writeDebugStreamLine("Pot = %d", SensorValue[potGripper]);
 		genericControl();
 	}
 }
