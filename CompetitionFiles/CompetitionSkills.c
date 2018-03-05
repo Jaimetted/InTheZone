@@ -334,7 +334,7 @@ void progSkills()
 	moveBaseWithFactor(20,2000,1);
 	setPositionMogo(GET_MOGO);
 	rotateToAngle(90,600);
-	moveBaseWithFactor(9,1000,1);
+	moveBaseWithFactor(5,1000,1);
 	rotateToAngle(180, 1000);
 	wait1Msec(200);
 	moveBaseWithFactor(5,1000,1);
@@ -342,24 +342,19 @@ void progSkills()
 	rotateToAngle(90,2000);
 	setPositionMogo(VERTICAL_MOGO);
 	setMOGOGripper(-15);
-	moveBase(127);
-	wait1Msec(1500);
-	moveBase(0);
+	moveBaseWithFactor(15,700,1);
 	setPositionMogo(VERTICAL_MOGO+700);
 	setMOGOGripper(0);
+	rotateToAngle(90,3000);
 	moveBaseBack(20,2000,1);
-	moveBase(20);
-	wait1Msec(800);
-	moveBase(0);
 	setPositionMogo(GET_MOGO);
-	rotateToAngle(90,1000);
 	rotateToAngle(180, 1500);
 	wait1Msec(200);
-	moveBaseWithFactor(3,1000,1);
+	moveBaseWithFactor(7,1000,1);//UUUUUUUUGGGGGGHHHH
 	wait1Msec(200);
 	rotateToAngle(274,1000);
 	//Repeat
-	moveBase(-30);
+	moveBase(-50);
 	wait1Msec(750);
 	moveBase(0);
 	setPositionMogo(DROP_MOGO);
@@ -371,9 +366,7 @@ void progSkills()
 	rotateToAngle(270,2000);
 	setPositionMogo(VERTICAL_MOGO);
 	setMOGOGripper(-15);
-	moveBase(127);
-	wait1Msec(2000);
-	moveBase(0);
+	moveBaseWithFactor(15,700,1);
 	setPositionMogo(VERTICAL_MOGO+700);
 	setMOGOGripper(0);
 	moveBaseBack(20,2000,1);
