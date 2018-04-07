@@ -3,42 +3,104 @@
 
 #define CHARS_PER_MESS 24
 #define CHARS_PER_VAL 8
+#define X_START 0
+#define Y_START 7
+#define Z_START 15
 
 int rcvChar;
 int startChar = 120; // Delimeter for messages char value = 'x'
+
+char* format(float n){
+	char str[] = "0000000000000000000000000";
+	str[0] = n;
+	if(n < 0) str[0] = '-';
+	else str[0] = '+';
+	char *number;
+	sprintf(str, "%f", n);
+
+	//memcpy(*str + 1, number + 1, 8);
+	return str;
+}
+
+float getX(char *message){
+	char x_str[CHARS_PER_MESS];
+	memcpy(x_str, message + X_START + 1 /* Offset */, 8 /* Length */);
+	float x = atof(x_str);
+	if(message[X_START] == '-') x*=-1;
+	return x;
+}
+
+float getY(char *message){
+	char y_str[CHARS_PER_MESS];
+	memcpy(y_str, message + Y_START + 1 /* Offset */, 8 /* Length */);
+	float y = atof(y_str);
+	if(message[Y_START] == '-') y*=-1;
+	return y;
+}
+
+float getZ(char *message){
+	char z_str[CHARS_PER_MESS];
+	memcpy(z_str, message + Z_START + 1 /* Offset */, 8 /* Length */);
+	float z = atof(z_str);
+	if(message[Z_START] == '-') z*=-1;
+	return z;
+}
+
+
+
 task main()
 {
-  setBaudRate(uartOne, baudRate9600);
+	float x;
+	float y;
+	float z;
+	char message[CHARS_PER_MESS];
+	char buf[100];
+	sprintf(buf, "%f", 105.61);
+	writeDebugStreamLine("%s",buf);
+	/*
+	char message[] = "-123.123-22345.6+32543.23";
+	writeDebugStreamLine("x: %f",getX(x));
+	writeDebugStreamLine("y: %f",getY(message));
+	writeDebugStreamLine("z: %f",getZ(message));
 
-  while (getChar(uartOne) != -1) // Purge existing chars from buffer
-  {}
+	setBaudRate(uartOne, baudRate9600);
+
+	while (getChar(uartOne) != -1) // Purge existing chars from buffer
+	{}
 
 	while (true)
-  {
-    rcvChar = getChar(uartOne);
+	{
+		rcvChar = getChar(uartOne);
 
-    if (rcvChar == -1)
-    {
-      // No character available
+		if (rcvChar == -1)
+		{
+			// No character available
 
-      wait1Msec(2); // Don't want to consume too much CPU time. Waiting eliminates CPU consumption for this task.
-      continue;
-    }
-    if (rcvChar == startChar){
-    	int charCounter = 0;
-    	while(charCounter < CHARS_PER_MESS){
-	    	rcvChar = getChar(uartOne);
-		    if (rcvChar == -1)
-		    {
-		      // No character available
+			wait1Msec(2); // Don't want to consume too much CPU time. Waiting eliminates CPU consumption for this task.
+			continue;
+		}
+		if (rcvChar == startChar){
+			int charCounter = 0;
 
-		      wait1Msec(2); // Don't want to consume too much CPU time. Waiting eliminates CPU consumption for this task.
-		      continue;
-		    }
-	    	writeDebugStream("%c", rcvChar);
-	    	charCounter++;
-    	}
-    	writeDebugStream("\n");
-    }
-  }
+			while(charCounter < CHARS_PER_MESS){
+				rcvChar = getChar(uartOne);
+				if (rcvChar == -1)
+				{
+					// No character available
+
+					wait1Msec(2); // Don't want to consume too much CPU time. Waiting eliminates CPU consumption for this task.
+					continue;
+				}
+				writeDebugStream("%c", rcvChar);
+				message[charCounter] = (char)rcvChar;
+				charCounter++;
+			}
+			writeDebugStream("\n");
+			//x = getX(message);
+			//y = getY(message);
+			//z = getZ(message);
+		}
+	}
+	*/
+
 }
