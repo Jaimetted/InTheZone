@@ -113,12 +113,29 @@ void displayCalStatus(void)
 
 /**************************************************************************/
 /*
+    Format output for cortex
+*/
+/**************************************************************************/
+
+String format(float n){
+  String result(""),number(n);;
+  if(n >= 0) result += '+';
+  result += number;
+  for(int i = result.length(); i < 8; i++){
+    result += '0';
+  }
+  return result.substring(0,8);
+}
+
+/**************************************************************************/
+/*
     Arduino setup function (automatically called at startup)
 */
 /**************************************************************************/
 void setup(void)
 {
   Serial.begin(9600);
+  Serial3.begin(9600);
   Serial.println("Orientation Sensor Test"); Serial.println("");
 
   /* Initialise the sensor */
@@ -145,7 +162,7 @@ void setup(void)
     Arduino loop function, called once 'setup' is complete (your own code
     should go here)
 */
-/**************************************************************************/
+/**************************************************************************/\
 void loop(void)
 {
   /* Get a new sensor event */
@@ -161,6 +178,8 @@ void loop(void)
   Serial.print("\tAy: ");
   Serial.print(lineacc.y(), 4);
 
+  Serial3.print("x"+format(event.orientation.x)+format(lineacc.x())+format(lineacc.y()));
+  
   /* Optional: Display calibration status */
   displayCalStatus();
 
