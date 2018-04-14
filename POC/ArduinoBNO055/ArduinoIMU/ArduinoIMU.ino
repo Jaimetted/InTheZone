@@ -178,8 +178,8 @@ void loop(void)
   Serial.print("\tAy: ");
   Serial.print(lineacc.y(), 4);
 
-  Serial3.print("x"+format(event.orientation.x)+format(lineacc.x())+format(lineacc.y()));
-  
+  //Serial3.print("x"+format(event.orientation.x)+format(lineacc.x())+format(lineacc.y()));
+  Serial3.print("x"+format(event.orientation.x));
   /* Optional: Display calibration status */
   displayCalStatus();
 

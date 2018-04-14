@@ -10,18 +10,6 @@
 int rcvChar;
 int startChar = 120; // Delimeter for messages char value = 'x'
 
-char* format(float n){
-	char str[] = "0000000000000000000000000";
-	str[0] = n;
-	if(n < 0) str[0] = '-';
-	else str[0] = '+';
-	char *number;
-	sprintf(str, "%f", n);
-
-	//memcpy(*str + 1, number + 1, 8);
-	return str;
-}
-
 float getX(char *message){
 	char x_str[CHARS_PER_MESS];
 	memcpy(x_str, message + X_START + 1 /* Offset */, 8 /* Length */);
@@ -50,19 +38,15 @@ float getZ(char *message){
 
 task main()
 {
-	float x;
-	float y;
-	float z;
+	//float x,y,z;
 	char message[CHARS_PER_MESS];
-	char buf[100];
-	sprintf(buf, "%f", 105.61);
-	writeDebugStreamLine("%s",buf);
+
 	/*
 	char message[] = "-123.123-22345.6+32543.23";
 	writeDebugStreamLine("x: %f",getX(x));
 	writeDebugStreamLine("y: %f",getY(message));
 	writeDebugStreamLine("z: %f",getZ(message));
-
+	*/
 	setBaudRate(uartOne, baudRate9600);
 
 	while (getChar(uartOne) != -1) // Purge existing chars from buffer
@@ -71,7 +55,7 @@ task main()
 	while (true)
 	{
 		rcvChar = getChar(uartOne);
-
+		//writeDebugStreamLine("%c",rcvChar);
 		if (rcvChar == -1)
 		{
 			// No character available
@@ -96,11 +80,14 @@ task main()
 				charCounter++;
 			}
 			writeDebugStream("\n");
-			//x = getX(message);
-			//y = getY(message);
-			//z = getZ(message);
+			//x = getX(message);y = getY(message);z = getZ(message);
+			writeDebugStreamLine("x: %f",getX(message));
+			writeDebugStreamLine("y: %f",getY(message));
+			writeDebugStreamLine("z: %f",getZ(message));
+
+			wait1Msec(100);
 		}
 	}
-	*/
+
 
 }
