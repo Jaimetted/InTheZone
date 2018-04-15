@@ -29,9 +29,10 @@
 */
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (1)
+#define BNO055_SAMPLERATE_DELAY_US (1)
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
+float offset = 0;
 
 /**************************************************************************/
 /*
@@ -134,7 +135,7 @@ String format(float n){
 /**************************************************************************/
 void setup(void)
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial3.begin(115200);
   Serial.println("Orientation Sensor Test"); Serial.println("");
 
@@ -155,6 +156,22 @@ void setup(void)
   displaySensorStatus();
 
   bno.setExtCrystalUse(true);
+  
+  float values[5];
+  while(true){
+    sensors_event_t event;
+    bno.getEvent(&event);
+  
+    values[0] = event.orientation.x;
+    values[1] = values[0];
+    values[2] = values[1];
+    values[3] = values[2];
+    values[4] = values[3];
+    if(values[0]=values[1]=values[2]=values[3]=values[4]){
+      break;
+    }
+  }
+  offset = values[0];
 }
 
 /**************************************************************************/
@@ -171,14 +188,13 @@ void loop(void)
   imu::Vector<3> lineacc = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
   imu::Vector<3> gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
 
+  float angle = event.orientation.x - offset;
+  if(angle < 0){
+    angle = angle + 360;
+  }
   /* Display the floating point data */
   Serial.print("Gx: ");
-  //Serial.print(event.orientation.x, 4);
-  Serial.print(gyro.x(), 4);
-  Serial.print("\tAx: ");
-  Serial.print(lineacc.x(), 4);
-  Serial.print("\tAy: ");
-  Serial.print(lineacc.y(), 4);
+  Serial.print(angle, 4);
 
   //Serial3.print("x"+format(event.orientation.x)+format(lineacc.x())+format(lineacc.y()));
   Serial3.print("x"+format(event.orientation.x));
@@ -192,5 +208,5 @@ void loop(void)
   Serial.println("");
 
   /* Wait the specified delay before requesting nex data */
-  delay(BNO055_SAMPLERATE_DELAY_MS);
+  delayMicroseconds(BNO055_SAMPLERATE_DELAY_US);
 }
