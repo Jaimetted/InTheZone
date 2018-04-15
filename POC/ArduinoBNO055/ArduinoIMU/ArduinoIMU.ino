@@ -197,7 +197,7 @@ void loop(void)
   Serial.print(angle, 4);
 
   //Serial3.print("x"+format(event.orientation.x)+format(lineacc.x())+format(lineacc.y()));
-  Serial3.print("x"+format(event.orientation.x));
+  Serial3.print("x"+format(angle));
   /* Optional: Display calibration status */
   displayCalStatus();
 
