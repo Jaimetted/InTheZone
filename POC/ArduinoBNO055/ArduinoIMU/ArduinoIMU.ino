@@ -29,7 +29,7 @@
 */
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (100)
+#define BNO055_SAMPLERATE_DELAY_MS (1)
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
@@ -135,7 +135,7 @@ String format(float n){
 void setup(void)
 {
   Serial.begin(9600);
-  Serial3.begin(9600);
+  Serial3.begin(115200);
   Serial.println("Orientation Sensor Test"); Serial.println("");
 
   /* Initialise the sensor */
@@ -145,7 +145,7 @@ void setup(void)
     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
     while(1);
   }
-
+  bno.setMode(bno.OPERATION_MODE_IMUPLUS);
   delay(1000);
 
   /* Display some basic information on this sensor */
@@ -169,10 +169,12 @@ void loop(void)
   sensors_event_t event;
   bno.getEvent(&event);
   imu::Vector<3> lineacc = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+  imu::Vector<3> gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
 
   /* Display the floating point data */
   Serial.print("Gx: ");
-  Serial.print(event.orientation.x, 4);
+  //Serial.print(event.orientation.x, 4);
+  Serial.print(gyro.x(), 4);
   Serial.print("\tAx: ");
   Serial.print(lineacc.x(), 4);
   Serial.print("\tAy: ");
