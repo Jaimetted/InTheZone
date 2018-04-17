@@ -1,6 +1,7 @@
 #pragma config(UART_Usage, UART1, uartUserControl, baudRate115200, IOPins, None, None)
 #pragma config(Sensor, dgtl1,  left,           sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  right,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  arduinoReset,   sensorDigitalOut)
 #pragma config(Motor,  port2,           left1,         tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           left2,         tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           left3,         tmotorVex393_MC29, openLoop)
@@ -97,8 +98,8 @@ task arduinoComm()
 				charCounter++;
 			}
 			//writeDebugStream("\n");
-			z = getX(message);
-			writeDebugStreamLine("Angle = %f", z);
+			z = 360-getX(message)==360 ? 0 : 360-getX(message);// Aclaracion
+			//writeDebugStreamLine("Angle = %f", z);
 		}
 	}
 	wait1Msec(1);
@@ -146,7 +147,7 @@ void stopBase()
 
 void rotateBase(int speed)
 {
-	int max = 60;
+	int max = 127;
 	if(speed > max)
 		speed = max;
 	else if(speed < max*-1)
@@ -216,45 +217,52 @@ void rotateToAngle(float targetAngle, int time){
 	writeDebugStreamLine("Start rotateToAngle");
 	writeDebugStreamLine("Target angle = %f", targetAngle);
 	bool atGyro=false, isCW=false;
-	float pidGyroResult;
-	counter = 0;
+	float pidGyroResult, offset, currAngle;
+	int counter = 0;
 
 	// Change negative target angle to 0-360 range
 	if(targetAngle < 0){
-		targetAngle = 360 + targetAngle;
+		targetAngle += 360;
 	}
 
-	if(targetAngle < z){
-		isCW=true;
-	}
+	// Set offset as current angle
+	offset = z;
+
+	// Offset target
+	targetAngle -= offset;
+	if(targetAngle < 0)
+		targetAngle += 360;
+
+	// Is CW
+	if(targetAngle > 180)
+		isCW = true;
 
 	// PID Constant cases
 	PID pidGyro;
-	PIDInit(&pidGyro, 5, 0, 0); // Set P, I, and D constants
+	PIDInit(&pidGyro, 1.3, 0.3, 2); // Set P, I, and D constants
 
 	clearTimer(T1);
 	while(!atGyro && time1[T1] < time){
-		writeDebugStreamLine("Current angle = %f", z);
+		// Calculate current angle
+		currAngle = z - offset;
+		if(currAngle < 0)
+			currAngle += 360;
+		if(isCW && currAngle == 0)
+			currAngle = 360;
+		writeDebugStreamLine("Current angle = %f", currAngle);
 
 		// Calculate error
-		float error = targetAngle - z;
-		if(error > 180){
-			error = 360 - error;
-		}
-		else if(error < -180){
-			error = -360 - error;
-		}
+		float error = targetAngle - currAngle;
 		writeDebugStreamLine("error=%f",error);
+
 		// Compute PID
 		pidGyroResult = PIDCompute(&pidGyro, error);
-
-		// Decide if rotation is CW or CCW
 		rotateBase(pidGyroResult);
 
 		// Condition to end
-		if (abs(z-targetAngle)<0.2)
+		if (abs(z-targetAngle)<0.25)
 			counter++;
-		if (counter > 10)
+		if (counter > 100)
 			atGyro = true;
 		wait1Msec(1);
 	}
@@ -283,10 +291,10 @@ void moveTo (int newX, int newY){//Recieves values in inches
 		targetAngle = z;
 
 	//Move Robot
-	rotateToAngle(targetAngle,500);
+	rotateToAngle(targetAngle,2000);
 	magnitude = sqrt(((dx)*(dx)) + ((dy)*(dy)));
 	wait1Msec(2000);//Remove once PID is done
-	moveBaseWithFactor(magnitude,2000,75);//TODO, change with PID
+	moveBaseWithFactor(magnitude,2000,1);//TODO, change with PID
 
 }
 
@@ -294,7 +302,11 @@ void initializeSensors (){
 	//Initialize Encoders
 	SensorValue[right] = 0;
 	SensorValue[left] = 0;
-	//End Initialize Encoder
+	//Reset Arduino
+	SensorValue[arduinoReset] = 0;
+	wait1Msec(500);
+	SensorValue[arduinoReset] = 1;
+	wait1Msec(5000);
 }
 
 
@@ -302,9 +314,9 @@ task main()
 {
 	BNS();
 	initializeSensors();
-	//startTask(aps);
+	startTask(aps);
 	startTask(arduinoComm);
-	//rotateToAngle(90,2000);
+	rotateToAngle(30,50000);
 	//moveTo(0,0);
 	/*setBase(60);
 	wait1Msec(500);
@@ -314,5 +326,5 @@ task main()
 	wait1Msec(500);
 	setBase(0);
 	*/
-	while(1){wait10Msec(1);}
+	while(1){}
 }
