@@ -239,8 +239,8 @@ void rotateToAngle(float targetAngle, int time){
 
 	// PID Constant cases
 	PID pidGyro;
-	PIDInit(&pidGyro, 1.3, 0.3, 2); // Set P, I, and D constants
-
+	PIDInit(&pidGyro, 2,0,10); // Set P, I, and D constants
+	// giro de 30 PIDInit(&pidGyro, 1.3, 0.3, 4); // Set P, I, and D constants
 	clearTimer(T1);
 	while(!atGyro && time1[T1] < time){
 		// Calculate current angle
@@ -269,6 +269,68 @@ void rotateToAngle(float targetAngle, int time){
 	writeDebugStreamLine("Final angle = %f", z);
 	stopBase();
 }
+
+float rotateToAngleOptimal(float targetAngle, int time,float P,float D,float &overshoot){
+	//writeDebugStreamLine("Start rotateToAngle");
+	//writeDebugStreamLine("Target angle = %f", targetAngle);
+	bool atGyro=false, isCW=false;
+	float pidGyroResult, offset, currAngle;
+	int counter = 0;
+
+	// Change negative target angle to 0-360 range
+	if(targetAngle < 0){
+		targetAngle += 360;
+	}
+
+	// Set offset as current angle
+	offset = z;
+
+	// Offset target
+	targetAngle -= offset;
+	if(targetAngle < 0)
+		targetAngle += 360;
+
+	// Is CW
+	if(targetAngle > 180)
+		isCW = true;
+
+	// PID Constant cases
+	PID pidGyro;
+	PIDInit(&pidGyro, P,0,D); // Set P, I, and D constants
+	// giro de 30 PIDInit(&pidGyro, 1.3, 0.3, 4); // Set P, I, and D constants
+	clearTimer(T1);
+	float error;
+	while(!atGyro && time1[T1] < time){
+		// Calculate current angle
+		currAngle = z - offset;
+		if(currAngle < 0)
+			currAngle += 360;
+		if(isCW && currAngle == 0)
+			currAngle = 360;
+		writeDebugStreamLine("Current angle = %f", currAngle);
+
+		// Calculate error
+	  error = targetAngle - currAngle;
+		writeDebugStreamLine("error=%f",error);
+
+		// Compute PID
+		pidGyroResult = PIDCompute(&pidGyro, error);
+		rotateBase(pidGyroResult);
+
+		// Condition to end
+		if (abs(z-targetAngle)<0.25)
+			counter++;
+		if (counter > 100)
+			atGyro = true;
+		if(currAngle > overshoot)
+			overshoot = currAngle;
+		wait1Msec(1);
+	}
+	writeDebugStreamLine("Final angle = %f", z);
+	stopBase();
+	return error;
+}
+
 
 void moveTo (int newX, int newY){//Recieves values in inches
 	float targetAngle=0;
@@ -306,7 +368,7 @@ void initializeSensors (){
 	SensorValue[arduinoReset] = 0;
 	wait1Msec(500);
 	SensorValue[arduinoReset] = 1;
-	wait1Msec(5000);
+	wait1Msec(3000);
 }
 
 
@@ -316,7 +378,25 @@ task main()
 	initializeSensors();
 	startTask(aps);
 	startTask(arduinoComm);
-	rotateToAngle(30,50000);
+	//rotateToAngle(90,50000);
+	float overshoot = 0;
+	float error = 90;
+	float finalP,finalD,currentError,finalOvershoot;
+	rotateToAngleOptimal(90,2000,1,1,overshoot);
+/*	for(float P = 1.0; P <= 3.0; P += 0.1){
+		for(float D = 1.0; D <= 3.0; D += 0.1){
+			initializeSensors();
+			currentError = rotateToAngleOptimal(90,2000,P,D,overshoot);
+			if(currentError < error){
+				error = currentError;
+				finalOvershoot = overshoot;
+				finalP = P;
+				finalD = D;
+				writeDebugStreamLine("Error: %f, Overshoot: %f, P: %f, D: %f",error,finalOvershoot,finalP,finalD);
+			}
+		}
+	}
+	*/
 	//moveTo(0,0);
 	/*setBase(60);
 	wait1Msec(500);
