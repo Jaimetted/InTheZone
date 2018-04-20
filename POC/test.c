@@ -1,5 +1,7 @@
 #pragma config(Sensor, in1,    gyroBase,       sensorGyro)
 #pragma config(Sensor, in2,    potGripper,     sensorPotentiometer)
+#pragma config(Sensor, in3,    linetracker1,   sensorReflection)
+#pragma config(Sensor, in4,    linetracker2,   sensorReflection)
 #pragma config(Sensor, dgtl1,  left,           sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  right,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  arduinoReset,   sensorDigitalOut)
@@ -27,6 +29,7 @@
 #define CHARS_PER_MESS 8
 #define CHARS_PER_VAL 8
 #define X_START 0
+#define LINE_COLOR 2300
 
 int rcvChar;
 int startChar = 120; // Delimeter for messages char value = 'x'
@@ -36,21 +39,21 @@ float z=0;
 // affect position, e.g. when turning.
 
 void setBase(int speed){
-		motor[left1] = speed;
-		motor[left2] = speed;
-		motor[left3] = speed;
-		motor[right1] = speed;
-		motor[right2] = speed;
-		motor[right3] = speed;
+	motor[left1] = speed;
+	motor[left2] = speed;
+	motor[left3] = speed;
+	motor[right1] = speed;
+	motor[right2] = speed;
+	motor[right3] = speed;
 }
 
 void setBase(int speedR, int speedL){
-		motor[left1] = speedL;
-		motor[left2] = speedL;
-		motor[left3] = speedL;
-		motor[right1] = speedR;
-		motor[right2] = speedR;
-		motor[right3] = speedR;
+	motor[left1] = speedL;
+	motor[left2] = speedL;
+	motor[left3] = speedL;
+	motor[right1] = speedR;
+	motor[right2] = speedR;
+	motor[right3] = speedR;
 }
 
 void setMOGOGripper(int speed){
@@ -144,6 +147,66 @@ void moveBaseWithFactor(int distance, int time, float factor){
 	writeDebugStreamLine("Encoder at position = %d", encoderAvg);
 }
 
+bool isOnLine(int sensor){
+	/// change comparinson operator when line color changes
+	if(sensor > LINE_COLOR){
+		return true;
+	}
+	return false;
+}
+
+void moveToLine(int speed){
+	bool found1 = false, found2 = false, end1 = false, end2 = false;
+
+	while(!end1 || !end2){
+		if(isOnLine(SensorValue(linetracker1))){
+			found1 = true;
+			clearTimer(T2);
+		}
+		else{
+			motor[left1] = speed;
+			motor[left2] = speed;
+			motor[left3] = speed;
+		}
+		if(found1){
+			if(time1[T2]<100){
+				motor[left1] = -speed;
+				motor[left2] = -speed;
+				motor[left3] = -speed;
+			}
+			else{
+				end1=true;
+				motor[left1] = 0;
+				motor[left2] = 0;
+				motor[left3] = 0;
+			}
+		}
+
+		if(isOnLine(SensorValue(linetracker2))){
+			found2 = true;
+			clearTimer(T3);
+		}
+		else{
+			motor[right1] = speed;
+			motor[right2] = speed;
+			motor[right3] = speed;
+		}
+		if(found1){
+			if(time1[T3]<100){
+				motor[right1] = -speed;
+				motor[right2] = -speed;
+				motor[right3] = -speed;
+			}
+			else{
+				end2 = true;
+				motor[right1] = 0;
+				motor[right2] = 0;
+				motor[right3] = 0;
+			}
+		}
+	}
+}
+
 float getX(char *message){
 	char x_str[CHARS_PER_MESS];
 	memcpy(x_str, message + X_START + 1 /* Offset */, 8 /* Length */);
@@ -218,9 +281,6 @@ task getGyro {
 		wait1Msec(25);																	 //Default is 90.
 	}
 }
-
-
-
 
 task arduinoComm()
 {
@@ -475,14 +535,16 @@ void progSkills()
 	rotateToAngle(1,1000,0.78,0,1.8);
 	setPositionMogo(VERTICAL_MOGO);
 	setMOGOGripper(-15);
-	moveBaseWithFactor(5,700,1);
+	moveBaseWithFactor(7,700,1);
 	setPositionMogo(VERTICAL_MOGO+700);
 	setMOGOGripper(0);
-	moveBaseBack(20,2000,1);
+	moveBaseBack(15,2000,1);
 	setPositionMogo(GET_MOGO);
-	moveBaseBack(5,2000,1);
+	rotateToAngle(360,2000);
+	moveToLine(30);
+	//moveBaseBack(5,2000,1);
 	rotateToAngle(-90,2000,1.35,0,1.8);
-	moveBaseWithFactor(5,2000,1);
+	//moveBaseWithFactor(5,2000,1);
 	rotateToAngle(-135,2000,1.35,0,1.8);
 	setPositionMogo(DROP_MOGO);
 	//wait1Msec(500000);
@@ -532,10 +594,14 @@ task main()
 {
 	initializeSensors();
 	startTask(arduinoComm);
-  progSkills();
-  //ile(true){
-  //riteDebugStreamLine("Sonar: %f",SensorValue(baseSonar);
-	//
-	//tateToAngle(90,2000);
 
+
+	progSkills();
+	/*while(true){
+	if(isOnLine(SensorValue(linetracker1))){
+	writeDebugStreamLine("Robot is on line");
+	writeDebugStreamLine("%d",SensorValue(linetracker1));
+	}
+	}
+	*/
 }
