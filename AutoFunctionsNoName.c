@@ -26,9 +26,9 @@
 #include "BNSLib.h";
 
 #define STOP 0
-#define CHAINBAR_HORIZONTAL 285
-#define CHAINBAR_VERTICAL 1850
-#define CHAINBAR_DOWN 60
+#define CHAINBAR_HORIZONTAL 1900
+#define CHAINBAR_VERTICAL 3570
+#define CHAINBAR_DOWN 1460
 #define MAX_CONE_DISTANCE 30
 #define MAX_ELEVATION 2900
 #define MAX_CONES 17
@@ -415,17 +415,17 @@ void setPositionCBHappy(int angle){
 
 void chainbarControl(){
 	if(vexRT(Btn8U)){
-		setChainbar(127);
-		//baseControl();
-		//setPositionCB(CHAINBAR_VERTICAL);
-		//setChainbar(15);
+		//setChainbar(127);
+		baseControl();
+		setPositionCB(CHAINBAR_VERTICAL);
+		setChainbar(15);
 		//setElevation(10);
 	}
 	else if(vexRT(Btn8D)){
-		setChainbar(-127);
-		//baseControl();
-		//setPositionCB(CHAINBAR_DOWN);
-		//setChainbar(0);
+		//setChainbar(-127);
+		baseControl();
+		setPositionCB(CHAINBAR_DOWN);
+		setChainbar(0);
 		//setElevation(10);
 	}
 	else{
@@ -960,7 +960,7 @@ task main()
 	//wait1Msec(5000);
 	//auto1();
 	while(true){
-	//writeDebugStreamLine("Pot = %d", SensorValue(potElevation));
+	  //writeDebugStreamLine("Pot = %d", SensorValue(potChainbar));
 		genericControl();
 	}
 }

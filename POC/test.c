@@ -530,7 +530,7 @@ void progSkills()
 	moveBaseWithFactor(20,2000,1);
 	setPositionMogo(GET_MOGO);
 	moveBaseWithFactor(5,2000,1);
-	rotateToAngle(70,2000,0.78,0,1.8);
+	rotateToAngle(70,2000,0.9,0,1.8);
 	moveBaseWithFactor(4.5,1000,1);
 	rotateToAngle(10,1000,1.5,0,1.8);
 	setPositionMogo(VERTICAL_MOGO);
@@ -545,10 +545,10 @@ void progSkills()
 	moveToLine(30);
 	wait1Msec(200);
   //moveBaseBack(5,2000,1);
-	rotateToAngle(-75,2000,1,0,1.8);
-	moveBaseUntil(65,5000);
+	rotateToAngle(-75,2000,0.8,0,1);
+	moveBaseUntil(68,5000);
 	//moveBaseWithFactor(5,2000,1);
-	rotateToAngle(-130,2000,2,0,1.8);
+	rotateToAngle(-120,2000,2,0,1.8);
 	setPositionMogo(DROP_MOGO);
 	//wait1Msec(500000);
 	moveBaseWithFactor(13,2000,1);
@@ -600,9 +600,5 @@ task main()
 {
 	initializeSensors();
 	startTask(arduinoComm);
-
-
 	progSkills();
-
-
 }
