@@ -103,7 +103,7 @@ float inchesToTicks(int inches)
 // prevent keep going infinitely the task if the robot can´t move and
 // finally, the variable factor to reduce the velocity of the robot.
 // Note: The distance in inches.
-void moveBaseWithFactor(int distance, int time, float factor){
+void moveBaseWithFactor(float distance, int time, float factor){
 	distance = inchesToTicks(distance);
 	//writeDebugStreamLine("Start moveBaseFront");
 	//writeDebugStreamLine("Target distance = %d", distance);
@@ -362,7 +362,7 @@ void rotateToAngle(float targetAngle, int time,float P, float I, float D){
 		currAngle = z - offset;
 		if(currAngle < 0)
 			currAngle += 360;
-		if(isCW && currAngle == 0)
+		if(isCW && currAngle < 180) // Un poquito de marron
 			currAngle = 360;
 		writeDebugStreamLine("Current angle = %f", currAngle);
 
@@ -531,31 +531,37 @@ void progSkills()
 	setPositionMogo(GET_MOGO);
 	moveBaseWithFactor(5,2000,1);
 	rotateToAngle(70,2000,0.78,0,1.8);
-	moveBaseWithFactor(5,1000,1);
-	rotateToAngle(1,1000,0.78,0,1.8);
+	moveBaseWithFactor(4.5,1000,1);
+	rotateToAngle(10,1000,1.5,0,1.8);
 	setPositionMogo(VERTICAL_MOGO);
 	setMOGOGripper(-15);
-	moveBaseWithFactor(7,700,1);
+	moveBaseWithFactor(8,700,1);
 	setPositionMogo(VERTICAL_MOGO+700);
 	setMOGOGripper(0);
-	moveBaseBack(15,2000,1);
+	moveBaseBack(20,2000,1);
 	setPositionMogo(GET_MOGO);
-	rotateToAngle(360,2000);
+	//rotateToAngle(0,2000);
+	wait1Msec(200);
 	moveToLine(30);
-	//moveBaseBack(5,2000,1);
-	rotateToAngle(-90,2000,1.35,0,1.8);
+	wait1Msec(200);
+  //moveBaseBack(5,2000,1);
+	rotateToAngle(-75,2000,1,0,1.8);
+	moveBaseUntil(65,5000);
 	//moveBaseWithFactor(5,2000,1);
-	rotateToAngle(-135,2000,1.35,0,1.8);
+	rotateToAngle(-130,2000,2,0,1.8);
 	setPositionMogo(DROP_MOGO);
 	//wait1Msec(500000);
 	moveBaseWithFactor(13,2000,1);
-	moveBaseBack(3,2000,1);
+	//moveBaseBack(4,2000,1);
 	setPositionMogo(VERTICAL_MOGO+685);
-	rotateToAngle(-165,2000,1.35,0,1.8);
+	rotateToAngle(-180,2000,2,0,1.8);
 	setPositionMogo(DROP_MOGO);
-	moveBaseBack(4,2000,1);
+	moveBaseWithFactor(8,2000,1);
+	rotateToAngle(90,2000,0.78,0,1.8);
+	moveBaseWithFactor(20,2000,1);
+	//moveBaseBack(4,2000,1);
 	setPositionMogo(GET_MOGO);
-	wait1Msec(200);
+	wait1Msec(20000);
 	moveBaseWithFactor(7,1000,1);//UUUUUUUUGGGGGGHHHH
 	wait1Msec(200);
 	rotateToAngle(274,1000);
@@ -597,11 +603,6 @@ task main()
 
 
 	progSkills();
-	/*while(true){
-	if(isOnLine(SensorValue(linetracker1))){
-	writeDebugStreamLine("Robot is on line");
-	writeDebugStreamLine("%d",SensorValue(linetracker1));
-	}
-	}
-	*/
+
+
 }
