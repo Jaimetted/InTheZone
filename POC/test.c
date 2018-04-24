@@ -155,6 +155,23 @@ bool isOnLine(int sensor){
 	return false;
 }
 
+void forwardUntilLine(int speed){
+	while(!isOnLine(SensorValue(linetracker1))){
+			motor[left1] = speed;
+			motor[left2] = speed;
+			motor[left3] = speed;
+			motor[right1] = speed;
+			motor[right2] = speed;
+			motor[right3] = speed;
+	}
+		motor[left1] = 0;
+		motor[left2] = 0;
+		motor[left3] = 0;
+		motor[right1] = 0;
+		motor[right2] = 0;
+		motor[right3] = 0;
+}
+
 void moveToLine(int speed){
 	bool found1 = false, found2 = false, end1 = false, end2 = false;
 
@@ -169,7 +186,7 @@ void moveToLine(int speed){
 			motor[left3] = speed;
 		}
 		if(found1){
-			if(time1[T2]<100){
+			if(time1[T2]<125){
 				motor[left1] = -speed;
 				motor[left2] = -speed;
 				motor[left3] = -speed;
@@ -192,7 +209,7 @@ void moveToLine(int speed){
 			motor[right3] = speed;
 		}
 		if(found1){
-			if(time1[T3]<100){
+			if(time1[T3]<125){
 				motor[right1] = -speed;
 				motor[right2] = -speed;
 				motor[right3] = -speed;
@@ -320,7 +337,7 @@ task arduinoComm()
 			}
 			//writeDebugStream("\n");
 			z = 360-getX(message)==360 ? 0 : 360-getX(message);// Aclaracion
-			//writeDebugStreamLine("Angle = %f", z);
+			writeDebugStreamLine("Angle = %f", z);
 		}
 	}
 	wait1Msec(1);
@@ -600,5 +617,44 @@ task main()
 {
 	initializeSensors();
 	startTask(arduinoComm);
-	progSkills();
+	//while(1) writeDebugStreamLine(
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(20,2000,1);
+	setPositionMogo(GET_MOGO);
+	moveBaseWithFactor(5,2000,1);
+	rotateToAngle(70,2000,0.9,0,1.8);
+	moveBaseWithFactor(4.5,1000,1);
+	rotateToAngle(10,1000,1.5,0,1.8);
+	setPositionMogo(VERTICAL_MOGO);
+	setMOGOGripper(-15);
+	moveBaseWithFactor(8,700,1);
+	setPositionMogo(VERTICAL_MOGO+700);
+	setMOGOGripper(0);
+	moveBaseBack(20,2000,1);
+	setPositionMogo(GET_MOGO);
+	rotateToAngle(0,2000);
+	wait1Msec(200);
+	moveToLine(30);
+	moveBaseBack(2,2000,1);
+	wait1Msec(200);
+	rotateToAngle(-87,2000,0.78,0,1.8);
+	moveBaseUntil(66,5000);
+	rotateToAngle(-120,2000,2,0,1.8);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(11.5,2000,1);
+	setPositionMogo(GET_MOGO);
+	rotateToAngle(-220,2000,2,0,1.8);
+	wait1Msec(1000);
+	moveBaseBack(3,2000,1);
+	rotateToAngle(-168,2000,4,0,1.8);
+	rotateToAngle(-168,2000,4,0,1.8);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(8,2000,1);
+	//rotateToAngle(90,2000,0.78,0,1.8);
+	//moveBaseWithFactor(20,2000,1);
+	//moveBaseBack(4,2000,1);
+	setPositionMogo(GET_MOGO);
+
+	//progSkills();
+
 }
