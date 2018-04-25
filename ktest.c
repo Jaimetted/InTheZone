@@ -1135,26 +1135,144 @@ void auto4()
 //Blue Side
 ////////////////////////
 
+void rSideStacking(){
+	setRollers(30);
+	setPositionDR(MAX_ELEVATION-800);
+	setChainbar(-127);
+	wait1Msec(700);
+	setChainbar(0);
+	// Crayola cone
+	moveBaseWithFactor(5,500,1);
+	wait1Msec(200);
+	setRollers(-127,200);
+	// First cone
+	moveBaseBack(3,500,1);
+	//moveBaseUntil(44,1000);
+	setPositionCB(CHAINBAR_VERTICAL);
+	setPositionDR(DOWN_DR);
+	setElevation(-15);
+	rotateToAngle(51,1000,2,0,1);
+	moveBaseWithFactor(32,2000,1);
+	setPositionCB(CHAINBAR_DOWN-20);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+	wait1Msec(600);
+	setRollers(10);
+	//Mogo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	rotateToAngle(77,700,4,0,1);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(14,1000,1);
+	setPositionMogo(GET_MOGO);
+	// Drop first cone
+	setRollers(-127,200);
+	wait1Msec(100);
+	// Second cone
+	rotateToAngle(77,700,6,0,1);
+	moveBaseBack(14,2000,1);
+	rotateToAngle(136,700,2,0,1);
+	//rotateToAngle(12,700,2,0,1);
+	moveBaseWithFactor(7,2000,1);
+	int i;
+	for(i=0;i<5;i++){
+		getConeFromSide();
+		cones++;
+	}
+	getConeAndHold();
+	cones++;
+	moveBaseBack(5,2000,1);
+	rotateToAngle(236,1000,2,0,1);
+	moveBaseWithFactor(39,2000,1);
+	rotateToAngle(180,2000,2,0,1);
+	setRollers(-10);
+	moveBaseWithFactor(25,2000,1);
+	setPositionDR(heights[cones] + SIDE_BAR);
+	setPositionMogo(VERTICAL_MOGO);
+	moveBaseWithFactor(10,1000,1);
+	setPositionMogo(DROP_MOGO);
+	moveBaseBack(10,1000,1);
+	setPositionMogo(VERTICAL_MOGO);
+	moveBaseBack(10,1000,1);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(10,1000,1);
+}
+
+
+// Starts Red side to short cones sides
+void bSideStacking()
+{
+	setRollers(30);
+	setPositionDR(MAX_ELEVATION-800);
+	setChainbar(-127);
+	wait1Msec(700);
+	setChainbar(0);
+	// Crayola cone
+	moveBaseWithFactor(5,500,1);
+	wait1Msec(200);
+	setRollers(-127,200);
+	// First cone
+	moveBaseBack(3,500,1);
+	//moveBaseUntil(44,1000);
+	setPositionCB(CHAINBAR_VERTICAL);
+	setPositionDR(DOWN_DR);
+	setElevation(-15);
+	rotateToAngle(309,1000,2,0,1);
+	moveBaseWithFactor(32,2000,1);
+	setPositionCB(CHAINBAR_DOWN-20);
+	setRollers(127);
+	setPositionDR(DOWN_DR);
+	wait1Msec(600);
+	setRollers(10);
+	//Mogo
+	setPositionCBHappy(CHAINBAR_VERTICAL);
+	setChainbar(12);
+	rotateToAngle(283,700,4,0,1);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(14,1000,1);
+	setPositionMogo(GET_MOGO);
+	// Drop first cone
+	setRollers(-127,200);
+	wait1Msec(100);
+	// Second cone
+	rotateToAngle(283,700,6,0,1);
+	moveBaseBack(14,2000,1);
+	rotateToAngle(224,700,2,0,1);
+	//rotateToAngle(12,700,2,0,1);
+	moveBaseWithFactor(7,2000,1);
+	int i;
+	for(i=0;i<5;i++){
+		getConeFromSide();
+		cones++;
+	}
+	getConeAndHold();
+	cones++;
+	moveBaseBack(5,2000,1);
+	rotateToAngle(124,1000,2,0,1);
+	moveBaseWithFactor(39,2000,1);
+	rotateToAngle(180,2000,2,0,1);
+	setRollers(-10);
+	moveBaseWithFactor(25,2000,1);
+	setPositionDR(heights[cones] + SIDE_BAR);
+	setPositionMogo(VERTICAL_MOGO);
+	moveBaseWithFactor(10,1000,1);
+	setPositionMogo(DROP_MOGO);
+	moveBaseBack(10,1000,1);
+	setPositionMogo(VERTICAL_MOGO);
+	moveBaseBack(10,1000,1);
+	setPositionMogo(DROP_MOGO);
+	moveBaseWithFactor(10,1000,1);
+}
+
+
 
 task main()
 {
 	init();
 	startTask(getGyro);
-	//while(1){writeDebugStreamLine("d",SensorType[gyroBase]
-	//rotateToAngle(90,2000,1.5,0,1);
-	//wait10Msec(10000);
-	//rotateToAngle(45,2000,2,0,1);
-	auto_test();
-	/*
-	getConeFromSide(-300);
-	cones++;
-	int i;
-	for(i=0;i<12;i++){
-		getConeFromSide();
-		cones++;
-	}
-	*/
+	//bSideStacking();
 	while(true){
-		genericControl();
+		//genericControl();
+		writeDebugStreamLine("%d",SensorValue(potElevation);
 	}
 }
