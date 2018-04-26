@@ -617,7 +617,7 @@ task main()
 {
 	initializeSensors();
 	startTask(arduinoComm);
-	//while(1) writeDebugStreamLine(
+	while(1){}
 	setPositionMogo(DROP_MOGO);
 	moveBaseWithFactor(20,2000,1);
 	setPositionMogo(GET_MOGO);

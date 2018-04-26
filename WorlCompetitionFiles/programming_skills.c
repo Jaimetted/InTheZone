@@ -1,8 +1,9 @@
 #pragma config(UART_Usage, UART1, uartUserControl, baudRate115200, IOPins, None, None)
 #pragma config(Sensor, in1,    gyroBase,       sensorNone)
 #pragma config(Sensor, in2,    potGripper,     sensorPotentiometer)
-#pragma config(Sensor, in3,    linetracker1,   sensorReflection)
-#pragma config(Sensor, in4,    linetracker2,   sensorReflection)
+#pragma config(Sensor, in3,    linetrackerR,   sensorLineFollower)
+#pragma config(Sensor, in4,    linetrackerL,   sensorLineFollower)
+#pragma config(Sensor, in5,    potCB,          sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  left,           sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  right,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  arduinoReset,   sensorDigitalOut)
@@ -167,7 +168,7 @@ bool isOnLine(int sensor){
 }
 
 void forwardUntilLine(int speed){
-	while(!isOnLine(SensorValue(linetracker1))){
+	while(!isOnLine(SensorValue(linetrackerL))){
 			motor[left1] = speed;
 			motor[left2] = speed;
 			motor[right1] = speed;
@@ -183,7 +184,7 @@ void moveToLine(int speed){
 	bool found1 = false, found2 = false, end1 = false, end2 = false;
 
 	while(!end1 || !end2){
-		if(isOnLine(SensorValue(linetracker1))){
+		if(isOnLine(SensorValue(linetrackerL))){
 			found1 = true;
 			clearTimer(T2);
 		}
@@ -203,7 +204,7 @@ void moveToLine(int speed){
 			}
 		}
 
-		if(isOnLine(SensorValue(linetracker2))){
+		if(isOnLine(SensorValue(linetrackerR))){
 			found2 = true;
 			clearTimer(T3);
 		}
@@ -495,7 +496,7 @@ void genericControl(void){
 		motor[gripper] = 10;
 	}
 	else{
-		motor[gripper] = -50;
+		motor[gripper] = 0;
 	}
 }
 
@@ -587,7 +588,7 @@ void moveBaseDD(int encTarget, int maxTime)
 
 // Check if linetracker 1 or 2
 void moveToLineOnRight(int speed){
-	while(!isOnLine(SensorValue(linetracker1))){
+	while(!isOnLine(SensorValue(linetrackerR))){
 		moveBase(speed);
 	}
 	moveBase(-speed);
@@ -597,7 +598,7 @@ void moveToLineOnRight(int speed){
 
 // Check if linetracker 1 or 2
 void moveToLineOnLeft(int speed){
-	while(!isOnLine(SensorValue(linetracker2))){
+	while(!isOnLine(SensorValue(linetrackerL))){
 		moveBase(speed);
 	}
 	moveBase(-speed);
