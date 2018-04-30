@@ -464,19 +464,18 @@ void rotateToAngle(float targetAngle, int time){
 	stopBase();
 }
 
-bool gripperOpen = false;
 void genericControl(void){
 	motor[left1] = vexRT[Ch3] + vexRT[Ch4];
 	motor[left2] = vexRT[Ch3] + vexRT[Ch4];
 	motor[right1] = vexRT[Ch3] - vexRT[Ch4];
 	motor[right2] = vexRT[Ch3] - vexRT[Ch4];
-	motor[cbL] = vexRT[Ch2];
-	motor[cbR] = vexRT[Ch2];
-	if (vexRT[Btn8R]){
+	motor[cbL] = -vexRT[Ch2];
+	motor[cbR] = -vexRT[Ch2];
+	if (vexRT[Btn5D]){
 		motor[mogoL] = 127;
 		motor[mogoR] = 127;
 	}
-	else if (vexRT[Btn8L]){
+	else if (vexRT[Btn5U]){
 		motor[mogoL] = -127;
 		motor[mogoR] = -127;
 	}
@@ -486,17 +485,12 @@ void genericControl(void){
 	}
 	if (vexRT[Btn6D]){
 		motor[gripper] = 127;
-		gripperOpen = true;
 	}
 	else if (vexRT[Btn6U]){
 		motor[gripper] = -127;
-		gripperOpen = false;
-	}
-	else if(gripperOpen){
-		motor[gripper] = 10;
 	}
 	else{
-		motor[gripper] = 0;
+		motor[gripper] = -10;
 	}
 }
 
@@ -517,6 +511,28 @@ void setPositionMogo(int angle){
 		}
 	}
 	setMOGOGripper(0);
+}
+
+void setPositionCB(int angle){
+	clearTimer(T2);
+	if(SensorValue[potCB] < angle)
+	{
+		while(SensorValue[potCB] < angle && time1(T2) < 4000)
+		{
+			motor[cbL] = 127;
+			motor[cbR] = 127;
+		}
+	}
+	else
+	{
+		while(SensorValue(potCB)>angle && time1(T2) < 4000)
+		{
+			motor[cbL] = -127;
+			motor[cbR] = -127;
+		}
+	}
+	motor[cbL] = 0;
+	motor[cbR] = 0;
 }
 
 void initializeSensors (){
@@ -667,31 +683,37 @@ void moveToLineOnLeft(int speed){
 	setPositionMogo(GET_MOGO);
 }*/
 void autoDD(){
+	motor[gripper]=-40;
+	setPositionCB(2460);
 	setPositionMogo(DROP_MOGO);
-	moveBaseDD(20,2000);
+	moveBaseWithFactor(40,2000,1);
 	setPositionMogo(GET_MOGO);
-	moveBaseDD(5,500);
+	motor[gripper]=127;
+	wait1Msec(300);
+	motor[gripper]=0;
+	moveBaseWithFactor(5,500,1);
 	rotateToAngle(70,2000,0.9,0,1.8);
 	moveBaseWithFactor(4.5,1000,1);
 	rotateToAngle(10,1000,1.5,0,1.8);
 	setPositionMogo(VERTICAL_MOGO);
 	setMOGOGripper(-15);
-	moveBaseDD(8,700);
+	moveBaseWithFactor(8,700,1);
 	setPositionMogo(VERTICAL_MOGO+700);
 	setMOGOGripper(0);
-	moveBaseDD(-20,2000);
+	moveBaseBack(20,2000,1);
 	setPositionMogo(GET_MOGO);
 	rotateToAngle(0,2000);
 	wait1Msec(200);
 	moveToLine(30);
 	moveBaseBack(2,2000,1);
-	wait1Msec(200);
-	rotateToAngle(-87,2000,0.78,0,1.8);
-	moveBaseUntil(66,5000);
-	rotateToAngle(-120,2000,2,0,1.8);
-	setPositionMogo(DROP_MOGO);
-	moveBaseDD(11.5,2000);
-	setPositionMogo(GET_MOGO);
+	wait1Msec(100000);
+	//wait1Msec(200);
+	//rotateToAngle(-87,2000,0.78,0,1.8);
+	//moveBaseUntil(66,5000);
+	//rotateToAngle(-120,2000,2,0,1.8);
+	//setPositionMogo(DROP_MOGO);
+	//moveBaseDD(11.5,2000);
+	//setPositionMogo(GET_MOGO);
 	// Tested up to here
 	// Go get Second mogo
 	moveBaseDD(-9,1000);
@@ -735,7 +757,7 @@ void autoDD(){
 
 void pre_auton()
 {
-  bStopTasksBetweenModes = true;
+  bStopTasksBetweenModes = false;
   initializeSensors();
   startTask(arduinoComm);
 }
